@@ -89,7 +89,9 @@ public class Window {
 	    // The canvas
 	    glcanvas = new GLCanvas(capabilities);
 	    Render b = new Render();
-	    glcanvas.addGLEventListener(b);        
+	    glcanvas.addGLEventListener(b);
+	    glcanvas.addMouseListener(b);
+	    glcanvas.addMouseMotionListener(b);
 	    
 	    GLpanel.add(glcanvas, BorderLayout.CENTER);
 	    
