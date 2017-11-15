@@ -31,6 +31,9 @@ public class Render implements GLEventListener{
 	private GLU glu;
     final private GLCanvas glcanvas;
     
+    private int offsetLayer = 0;
+    private boolean isMapCreation = false;
+    
 	public static DisplayMode dm, dm_old;
 	
 	public Render() {
@@ -50,6 +53,7 @@ public class Render implements GLEventListener{
 		glcanvas.addGLEventListener(this);
 	    glcanvas.addMouseListener(camera);
 	    glcanvas.addMouseMotionListener(camera);
+	    glcanvas.addMouseWheelListener(camera);
 	    glcanvas.setSize(100, 100);
 	    
 		final FPSAnimator animator = new FPSAnimator(glcanvas, 300, true);
@@ -93,9 +97,15 @@ public class Render implements GLEventListener{
 		gl.glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 		gl.glClearDepth( 1.0f );
 		gl.glEnable( GL2.GL_DEPTH_TEST );
+		//przezroczystosc
+		gl.glEnable (GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		
 		gl.glDepthFunc( GL2.GL_LESS );
 		gl.glHint( GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST );
-		
+		//gl.glEnable (GL2.GL_COLOR_MATERIAL);
+		//gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
+		//gl.glMaterialf(GL2.GL_SHININESS, 100.0);
 		//definicja œwiat³a
 		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -125,7 +135,7 @@ public class Render implements GLEventListener{
 		gl.glMatrixMode( GL2.GL_PROJECTION );
 		gl.glLoadIdentity();
 				
-		glu.gluPerspective( 45.0f, h, 1.0, 100.0 );
+		glu.gluPerspective( 45.0f, h, 1.0, 200.0 );
 		gl.glMatrixMode( GL2.GL_MODELVIEW );
 		gl.glLoadIdentity();
 	}
@@ -189,21 +199,30 @@ public class Render implements GLEventListener{
 		
 		float no_mat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
-		float mat_diffuse[] = { 0.1f, 0.5f, 0.8f, 1.0f };
+		float mat_diffuse[] = { 0.1f, 0.5f, 0.8f, 0.8f }; //kolor, ostatni parametr okresla przezroczystosc
+		float mat_diffuse_modification[] = { 0.5f, 0.1f, 0.8f, 0.5f }; //kolor, ostatni parametr okresla przezroczystosc
 		float mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float low_shininess[] = { 5.0f };
 		
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_ambient_color, 0);
-	    gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 	    gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
 	    gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, low_shininess, 0);
 	    gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, no_mat, 0);
 	    
 		for (int index = 0; index < renderMap.getObstacleShift().size(); index++) {
+			
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 			//kostka o okreœlonym materiale
 			Point3d translate = renderMap.getObstacleShift().get(index);
+			Point3d raster = renderMap.pointFromShift(renderMap.getObstacleShift(), index);
+			if(this.isMapCreation && (int)raster.getZ() > offsetLayer)
+				continue;
+			if(this.isMapCreation && (int)raster.getZ() == offsetLayer)
+				gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse_modification, 0);
+			
 			gl.glPushMatrix();
 			gl.glTranslatef((float)translate.getX(), (float)translate.getY(), (float)translate.getZ());
+			
 			glut.glutSolidCube((float)renderMap.getSizeRaster());
 			gl.glPopMatrix();
 		}
@@ -239,6 +258,25 @@ public class Render implements GLEventListener{
 	public GLCanvas getGlcanvas() {
 		return glcanvas;
 	}
+
+	public int getOffsetLayer() {
+		return offsetLayer;
+	}
+
+	public void setOffsetLayer(int offsetLayer) {
+		this.offsetLayer = offsetLayer;
+	}
+
+	public boolean isMapCreation() {
+		return isMapCreation;
+	}
+
+	public void setMapCreation(boolean isMapCreation) {
+		this.isMapCreation = isMapCreation;
+		this.camera.setMapCreation(isMapCreation);
+	}
+	
+	
 	
 	//////////////////
 	

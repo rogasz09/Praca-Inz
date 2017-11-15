@@ -14,6 +14,10 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import optimumPath.common.Point3d;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 public class WindowNewMap extends JDialog {
 	/**
 	 * 
@@ -23,11 +27,18 @@ public class WindowNewMap extends JDialog {
 	private JSpinner spnSizeX;
 	private JSpinner spnSizeY;
 	private JSpinner spnSizeZ;
+	
+	private JButton okButton;
+	private JButton cancelButton;
 
+	private boolean isOk = false;
+	//private JDialog newMap;
 	/**
 	 * Create the dialog.
 	 */
 	public WindowNewMap() {
+		//newMap = this;
+		
 		setResizable(false);
 		setTitle("Nowa mapa");
 		setBounds(100, 100, 280, 218);
@@ -93,16 +104,48 @@ public class WindowNewMap extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				okButton = new JButton("OK");
+				
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
-				JButton cancelButton = new JButton("Cancel");
+				cancelButton = new JButton("Cancel");
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
 		}
+		createEvents();
 	}
+	
+	private void createEvents() {
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				isOk = false;
+				dispose();
+			}
+		});
+		
+		okButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				isOk = true;
+				dispose();
+			}
+		});
+	}
+	
+	public Point3d getSizeMap() {
+		Integer spnSizeXValue = (Integer)spnSizeX.getValue();
+		Integer spnSizeYValue = (Integer)spnSizeY.getValue();
+		Integer spnSizeZValue = (Integer)spnSizeZ.getValue();
+		
+		Point3d size = new Point3d(spnSizeXValue.doubleValue(), spnSizeYValue.doubleValue(), spnSizeZValue.doubleValue());
+		return size;
+	}
+
+	public boolean isOk() {
+		return isOk;
+	}
+	
 }

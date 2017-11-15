@@ -95,6 +95,47 @@ public class Map {
 		}
 	}
 	
+	public int[][][] rasterMapToIntMap(){
+		int intMap[][][] = new int[sizeZ][sizeY][sizeX];
+		
+		for(int z = 0; z < sizeZ; z++) {
+			for(int y = 0; y < sizeY; y++) {
+				for(int x = 0; x < sizeX; x++) {
+					if(rasterMap[z][y][x] == Raster.OBSTACLE)
+						intMap[z][y][x] = 1;
+					else
+						intMap[z][y][x] = 0;
+				}
+			}
+		}
+		
+		return intMap;
+	}
+	
+	public void intMapToRasterMap(int intMap[][][], int sizeX, int sizeY, int sizeZ){
+		setSize(sizeX, sizeY, sizeZ);
+		initMap();
+		
+		for(int z = 0; z < sizeZ; z++) {
+			for(int y = 0; y < sizeY; y++) {
+				for(int x = 0; x < sizeX; x++) {
+					if(intMap[z][y][x] == 1)
+						rasterMap[z][y][x] = Raster.OBSTACLE;
+				}
+			}
+		}
+		
+		makeShiftList();
+	}
+	
+	public Point3d pointFromShift(List<Point3d> List, int index) {
+		Point3d point = List.get(index);
+		double x = point.getX()/(double)sizeRaster;
+		double y = point.getZ()/(double)sizeRaster;
+		double z = point.getY()/(double)sizeRaster;
+		return new Point3d(x, y, z);
+	}
+	
 	public void makeShift(int x, int y, int z) {
 		double shiftX = (double)x * sizeRaster;
 		double shiftY = (double)z * sizeRaster;

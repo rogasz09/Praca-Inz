@@ -2,6 +2,9 @@ package optimumPath.window;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -13,25 +16,31 @@ import javax.swing.JButton;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JToolBar;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-
+import javax.swing.JSpinner;
+import javax.swing.event.ChangeListener;
 import javax.swing.UIManager;
 import javax.swing.JSlider;
 import javax.swing.JRadioButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.event.ChangeEvent;
+
 
 import optimumPath.frame.*;
 import optimumPath.opengl.*;
 import optimumPath.object.Map;
+import optimumPath.common.Point3d;
+import optimumPath.JSON.*;
+
 
 public class WindowMain extends JFrame {
 	
@@ -41,12 +50,22 @@ public class WindowMain extends JFrame {
 	private static final long serialVersionUID = -267010437272070514L;
 	
 	private Render render;
+	private JsonWriteRead json;
+	
 	private JMenuBar menuBar;
-	private JComboBox cbAlgorithm, cbMetrics;
 	private JSlider sliderAnimSpeed;
 	private JButton btnApply;
-	private ToolBarButton btnNewMap, btnSaveMap, btnLoadMap, btnExit;
 	private JPanel GLpanel;
+	private JSpinner spnLayer;
+	private JRadioButton rdbtnPreview, rdbtnMapMod;
+	private JComboBox cbAlgorithm, cbMetrics;
+	private ToolBarButton btnNewMap, btnSaveMap, btnLoadMap, btnExit;
+	private JMenuItem mntmExit, mntmLoadMap, mntmSaveMap, mntmNewMap;
+	private JMenuItem mntmDrawObstacle, mntmCheckStartPoint, mntmCheckStopPoint;
+	
+	//Create a file chooser
+	final private JFileChooser fc = new JFileChooser();
+	private JFrame windowMain = this;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -59,8 +78,10 @@ public class WindowMain extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		this.render = render;
+		this.json = new JsonWriteRead();
 		initComponents();
 		createEvents();
+		initLayerSpinner();
 		
 		//wpiêcie okna opengl do JPanel
 		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
@@ -81,31 +102,31 @@ public class WindowMain extends JFrame {
 		JMenu mnNewMenu = new JMenu("Pliki");
 		menuBar.add(mnNewMenu);
 		
-		JMenuItem mntmNewMap = new JMenuItem("Nowa mapa");
+		mntmNewMap = new JMenuItem("Nowa mapa");
 		mnNewMenu.add(mntmNewMap);
 		
-		JMenuItem mntmSaveMap = new JMenuItem("Zapisz mape");
+		mntmSaveMap = new JMenuItem("Zapisz mape");
 		mnNewMenu.add(mntmSaveMap);
 		
-		JMenuItem mntmLoadMap = new JMenuItem("Wczytaj mape");
+		mntmLoadMap = new JMenuItem("Wczytaj mape");
 		mnNewMenu.add(mntmLoadMap);
 		
 		JSeparator separator = new JSeparator();
 		mnNewMenu.add(separator);
 		
-		JMenuItem mntmExit = new JMenuItem("Zamknij");
+		mntmExit = new JMenuItem("Zamknij");
 		mnNewMenu.add(mntmExit);
 		
 		JMenu mnEdycja = new JMenu("Edycja");
 		menuBar.add(mnEdycja);
 		
-		JMenuItem mntmDrawObstacle = new JMenuItem("Rysuj przeszkod\u0119");
+		mntmDrawObstacle = new JMenuItem("Rysuj przeszkod\u0119");
 		mnEdycja.add(mntmDrawObstacle);
 		
-		JMenuItem mntmCheckStartPoint = new JMenuItem("Zaznacz punkt startowy");
+		mntmCheckStartPoint = new JMenuItem("Zaznacz punkt startowy");
 		mnEdycja.add(mntmCheckStartPoint);
 		
-		JMenuItem mntmCheckStopPoint = new JMenuItem("Zaznacz punkt ko\u0144cowy");
+		mntmCheckStopPoint = new JMenuItem("Zaznacz punkt ko\u0144cowy");
 		mnEdycja.add(mntmCheckStopPoint);
 		
 		JPanel contentPanel = new JPanel();
@@ -124,13 +145,18 @@ public class WindowMain extends JFrame {
 		panelMap.setBorder(new TitledBorder(null, "Mapa", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelOptions.add(panelMap);
 		
-		JRadioButton rdbtnPreview = new JRadioButton("Podgl\u0105d");
+		rdbtnPreview = new JRadioButton("Podgl\u0105d");
 		rdbtnPreview.setSelected(true);
-		JRadioButton rdbtnMapMod = new JRadioButton("Modyfikacja mapy");
+		rdbtnMapMod = new JRadioButton("Modyfikacja mapy");
 		
 		ButtonGroup group = new ButtonGroup();
 		group.add(rdbtnMapMod);
 		group.add(rdbtnPreview);
+		
+		spnLayer = new JSpinner();
+		spnLayer.setEnabled(false);
+		
+		JLabel lblWarstwa = new JLabel("Warstwa:");
 		
 		
 		GroupLayout gl_panelMap = new GroupLayout(panelMap);
@@ -139,17 +165,25 @@ public class WindowMain extends JFrame {
 				.addGroup(gl_panelMap.createSequentialGroup()
 					.addGap(20)
 					.addGroup(gl_panelMap.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panelMap.createSequentialGroup()
+							.addComponent(lblWarstwa)
+							.addGap(18)
+							.addComponent(spnLayer, GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
 						.addComponent(rdbtnMapMod)
 						.addComponent(rdbtnPreview))
-					.addContainerGap(93, Short.MAX_VALUE))
+					.addContainerGap())
 		);
 		gl_panelMap.setVerticalGroup(
 			gl_panelMap.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_panelMap.createSequentialGroup()
-					.addContainerGap(12, Short.MAX_VALUE)
+					.addContainerGap(10, Short.MAX_VALUE)
 					.addComponent(rdbtnPreview)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(rdbtnMapMod)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panelMap.createParallelGroup(Alignment.BASELINE)
+						.addComponent(spnLayer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblWarstwa))
 					.addContainerGap())
 		);
 		panelMap.setLayout(gl_panelMap);
@@ -275,7 +309,96 @@ public class WindowMain extends JFrame {
 		GLpanel = new JPanel();
 		contentPanel.add(GLpanel, BorderLayout.CENTER);
 	}
+	
+	public void initLayerSpinner() {
+		int maxLayer = render.getRenderMap().getSizeZ() - 1;
+		spnLayer.setModel(new SpinnerNumberModel(0, 0, maxLayer, 1));
+		//spnLayer.setValue(Integer.valueOf(0));
+	}
 
+	public void setOffsetMap() {
+		int layer = ((Integer)spnLayer.getValue()).intValue();
+		render.setOffsetLayer(layer);
+	}
+	
+	
+	public void setCameraToCenter(int side) {
+		double sizeRaster = render.getRenderMap().getSizeRaster();
+		
+		double lengthX = render.getRenderMap().getSizeX()*sizeRaster;
+		double lengthY = render.getRenderMap().getSizeY()*sizeRaster;
+		double lengthZ = render.getRenderMap().getSizeZ()*sizeRaster;
+		
+		double pCenterX = (lengthX - sizeRaster)/2;
+		double pCenterY = (lengthZ - sizeRaster)/2;
+		double pCenterZ = (lengthY - sizeRaster)/2;
+		
+		//usatawienie kamery w œrodku mapy
+		render.getCamera().setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
+		if (side == 0)
+			render.getCamera().setPointPos(new Point3d(pCenterX, pCenterY,  (lengthY*1.5 - sizeRaster)/2));
+		else
+			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ*1.5 - sizeRaster)/2, pCenterZ+0.001 ));
+	}
+	
+	public void createTemplateMap() {
+		//---------------------------------
+		//kod tymczasowy
+		//inicjalizacja mapy
+		int testMap[][][] = 
+			{{{1, 1, 1, 0, 1, 1, 0, 0, 0, 1},
+			  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
+		      {1, 1, 1, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 1, 1}},
+					
+			 {{1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 1, 0, 0, 1, 1, 0, 0, 0, 0},
+			  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
+			 
+		     {{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
+		     
+		     {{0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+			  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1}}};
+		
+		for(int z = 0; z < 4; z++)
+			for(int y = 0; y < 10; y++)
+				for(int x = 0; x < 10; x++) {
+					if (testMap[z][y][x] == 1) 
+						render.getRenderMap().setRaster(x, y, z, Map.Raster.OBSTACLE);
+				}
+					
+		render.getRenderMap().makeShiftList();
+	}
 	
 	
 	///////////////////////////////////////////////////////////////////
@@ -285,66 +408,103 @@ public class WindowMain extends JFrame {
 	private void createEvents() {
 		btnNewMap.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int sizeX = 10;
-				int sizeY = 10;
-				int sizeZ = 4;
+				WindowNewMap newMap = new WindowNewMap();
+				int loactionX = getX() + (getWidth() - newMap.getWidth())/2;
+				int loactionY = getY() + (getHeight() - newMap.getHeight())/2;
+				newMap.setLocation(loactionX, loactionY);
+				newMap.setModal(true);
+				newMap.setVisible(true);
 				
-				int testMap[][][] = 
-					{{{1, 1, 1, 0, 1, 1, 0, 0, 0, 1},
-					  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-				      {1, 1, 1, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 1, 1}},
-							
-					 {{1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 1, 0, 0, 1, 1, 0, 0, 0, 0},
-					  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
-					 
-				     {{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
-				     
-				     {{0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-				      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-					  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-					  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-					  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-					  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1}}};
+				if (!newMap.isOk())
+					return;
+				
+				Point3d size = newMap.getSizeMap();
+				
+				int sizeX = (int)size.getX();
+				int sizeY = (int)size.getY();
+				int sizeZ = (int)size.getZ();
 				
 				render.getRenderMap().setSize(sizeX, sizeY, sizeZ);
 				render.getRenderMap().initMap();
-				
-				for(int z = 0; z < sizeZ; z++)
-					for(int y = 0; y < sizeY; y++)
-						for(int x = 0; x < sizeX; x++) {
-							if (testMap[z][y][x] == 1)
-								render.getRenderMap().setRaster(x, y, z, Map.Raster.OBSTACLE);;
-						}
-							
-				render.getRenderMap().makeShiftList();
+				setCameraToCenter(0);
+				initLayerSpinner();
+				createTemplateMap();
+			}
+		});
+		
+		btnSaveMap.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int returnVal = fc.showSaveDialog(windowMain);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+			    	String filePath = fc.getSelectedFile().getPath();
+			    	//This is where a real application would open the file.
+			    	System.out.println("Saving: " + filePath);
+			    	int outputMap[][][] = render.getRenderMap().rasterMapToIntMap();
+			    	int sizeX = render.getRenderMap().getSizeX();
+			    	int sizeY = render.getRenderMap().getSizeY();
+			    	int sizeZ = render.getRenderMap().getSizeZ();
+			    	json.printMap(outputMap, sizeZ, sizeY, sizeX);
+			    	json.writeMapToJSON(filePath, outputMap, sizeZ, sizeY, sizeX);
+				} else {
+			    	System.out.println("Save command cancelled by user.");
+			   	}
+			}
+		});
+		
+		btnLoadMap.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int returnVal = fc.showOpenDialog(windowMain);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					String filePath = fc.getSelectedFile().getPath();
+			    	//This is where a real application would open the file.
+			        System.out.println("Opening: " + filePath);
+			        int outputMap[][][] = json.loadMapFromJSON(filePath);
+			        int sizeX = json.getSizeXfromJSON();
+			        int sizeY = json.getSizeYfromJSON();
+			        int sizeZ = json.getSizeZfromJSON();
+			        json.printMap(outputMap, sizeZ, sizeY, sizeX);
+			        render.getRenderMap().intMapToRasterMap(outputMap, sizeX, sizeY, sizeZ);
+			    } else {
+			    	System.out.println("Open command cancelled by user.");
+			    }
+			}
+		});
+		
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		
+		
+		mntmNewMap.addActionListener(btnNewMap.getActionListeners()[0]);
+		mntmSaveMap.addActionListener(btnSaveMap.getActionListeners()[0]);
+		mntmLoadMap.addActionListener(btnLoadMap.getActionListeners()[0]);
+		mntmExit.addActionListener(btnExit.getActionListeners()[0]);
+		
+		rdbtnPreview.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				spnLayer.setEnabled(false);
+				render.setMapCreation(false);
+				render.getCamera().loadPrevCamera();
+			}
+		});
+		
+		rdbtnMapMod.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				spnLayer.setEnabled(true);
+				render.setMapCreation(true);
+				render.getCamera().saveActualCamera();
+				setCameraToCenter(1);
+			}
+		});
+		
+		spnLayer.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				System.out.println("Zmieniono warstwe!");
+				setOffsetMap();
 			}
 		});
 	}
@@ -352,6 +512,4 @@ public class WindowMain extends JFrame {
 	public JPanel getGLpanel() {
 		return GLpanel;
 	}
-	
-	
 }
