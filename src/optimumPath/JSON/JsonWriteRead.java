@@ -66,7 +66,10 @@ public class JsonWriteRead {
 				}
 				if (y == sizeY - 1 && z == sizeZ - 1) {
 
-				} else {
+				} else if(y == sizeY - 1) {
+					temp += "\r\n";
+				}
+				else {
 					temp += "\n";
 				}
 
@@ -121,10 +124,13 @@ public class JsonWriteRead {
 			inputMap = new int[sizeZfromJSON][sizeYfromJSON][sizeXfromJSON];
 
 			// wiersze i wiersz iterowany
+			String[] layers;
 			String[] rows;
 			String[] row;
+			layers = mapFromJSON.split("\r\n");
 			rows = mapFromJSON.split("\n");
 			for (int z = 0; z < sizeZfromJSON; z++) {
+				rows = layers[z].split("\n");
 				for (int y = 0; y < sizeYfromJSON; y++) {
 					row = rows[y].split(" ");
 					for (int x = 0; x < sizeXfromJSON; x++) {
