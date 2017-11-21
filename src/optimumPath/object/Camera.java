@@ -25,6 +25,8 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     
     private boolean isMapCreation = false;
     
+    private MouseEvent mouse;
+    
     
     //////////////////////////////
     // konstruktory
@@ -235,6 +237,14 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 	public void setMapCreation(boolean isMapCreation) {
 		this.isMapCreation = isMapCreation;
 	}
+	
+	public MouseEvent getMouse() {
+		return mouse;
+	}
+
+	public void setMouse(MouseEvent mouse) {
+		this.mouse = mouse;
+	}
     
     /////////////////////////////////////////
 	
@@ -247,6 +257,7 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		mouse = e;
 		mouseButton = e.getButton();	// naciœniêty przycisk
 		prevMouseX = e.getX();  // zapisanie pozycji x myszy
 		prevMouseY = e.getY();  // zapisanie pozycji y myszy

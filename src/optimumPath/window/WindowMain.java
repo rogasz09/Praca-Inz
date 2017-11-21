@@ -29,6 +29,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JSpinner;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
 import javax.swing.JSlider;
 import javax.swing.JRadioButton;
@@ -64,7 +65,7 @@ public class WindowMain extends JFrame {
 	private JMenuItem mntmDrawObstacle, mntmCheckStartPoint, mntmCheckStopPoint;
 	
 	//Create a file chooser
-	final private JFileChooser fc = new JFileChooser();
+	final private JFileChooser fc;
 	private JFrame windowMain = this;
 	
 	/**
@@ -72,13 +73,18 @@ public class WindowMain extends JFrame {
 	 */
 	
 	public WindowMain(Render render) {
-		super("Optymalna œcie¿ka na mapie rastrowej");
+		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
 		setResizable(false);
-		setBounds(100, 100, 922, 669);
+		setBounds(100, 100, 922, 767);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		this.render = render;
 		this.json = new JsonWriteRead();
+		this.fc = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "JSON", "json");
+		fc.setFileFilter(filter);
+		setCameraToCenter(0);
+		
 		initComponents();
 		createEvents();
 		initLayerSpinner();
@@ -291,9 +297,13 @@ public class WindowMain extends JFrame {
 		contentPanel.add(toolBar, BorderLayout.NORTH);
 		
 		btnNewMap = new ToolBarButton();
+		btnNewMap.setToolTipText("Nowa mapa");
 		btnSaveMap = new ToolBarButton();
+		btnSaveMap.setToolTipText("Zapisz mape");
 		btnLoadMap = new ToolBarButton();
+		btnLoadMap.setToolTipText("Wczytaj mape");
 		btnExit = new ToolBarButton();
+		btnExit.setToolTipText("Zamknij program");
 		
 		btnNewMap.setIcon(new ImageIcon("toolbar_icons/New.gif"));
 		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/Save.gif"));
@@ -330,15 +340,19 @@ public class WindowMain extends JFrame {
 		double lengthZ = render.getRenderMap().getSizeZ()*sizeRaster;
 		
 		double pCenterX = (lengthX - sizeRaster)/2;
-		double pCenterY = (lengthZ - sizeRaster)/2;
+		double pCenterY = 0.0;
 		double pCenterZ = (lengthY - sizeRaster)/2;
 		
+		System.out.println("w: " + Integer.toString(render.getGlcanvas().getWidth()) + " h: " + Integer.toString(render.getGlcanvas().getHeight()));
+		System.out.println("Test" + Double.toString((lengthZ - sizeRaster) + 2.6*sizeRaster));
+		System.out.println("Test" + Double.toString(((lengthZ - sizeRaster) + 2.6*sizeRaster)*Math.tan(Math.toRadians(45.0))));
 		//usatawienie kamery w œrodku mapy
-		render.getCamera().setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
-		if (side == 0)
-			render.getCamera().setPointPos(new Point3d(pCenterX, pCenterY,  (lengthY*1.5 - sizeRaster)/2));
-		else
-			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ*1.5 - sizeRaster)/2, pCenterZ+0.001 ));
+		render.getCamera().setPointCenter(new Point3d(pCenterX, 0.0, pCenterZ));
+		if (side == 0) {
+			double pPosZ = lengthY*1.5 - sizeRaster;
+			render.getCamera().setPointPos(new Point3d(pCenterX, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
+		} else
+			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.01 ));
 	}
 	
 	public void createTemplateMap() {
@@ -439,6 +453,9 @@ public class WindowMain extends JFrame {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 			    	String filePath = fc.getSelectedFile().getPath();
 			    	//This is where a real application would open the file.
+			    	if (fc.getFileFilter().getDescription() == "JSON Files" && !filePath.endsWith(".JSON"))
+			    		filePath += ".JSON";
+			    	
 			    	System.out.println("Saving: " + filePath);
 			    	int outputMap[][][] = render.getRenderMap().rasterMapToIntMap();
 			    	int sizeX = render.getRenderMap().getSizeX();
@@ -466,6 +483,8 @@ public class WindowMain extends JFrame {
 			        int sizeZ = json.getSizeZfromJSON();
 			        json.printMap(outputMap, sizeZ, sizeY, sizeX);
 			        render.getRenderMap().intMapToRasterMap(outputMap, sizeX, sizeY, sizeZ);
+			        setCameraToCenter(0);
+					initLayerSpinner();
 			    } else {
 			    	System.out.println("Open command cancelled by user.");
 			    }

@@ -5,6 +5,7 @@ package optimumPath.opengl;
 
 
 import java.awt.DisplayMode;
+import java.awt.event.MouseEvent;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -65,23 +66,80 @@ public class Render implements GLEventListener{
 	
 	@Override
 	public void display(GLAutoDrawable drawable) {
-	
+		MouseEvent mouse = camera.getMouse();
+		
+		
+		int viewport[] = new int[4];
+	    double mvmatrix[] = new double[16];
+	    double projmatrix[] = new double[16];
+	    int realy = 0;// GL y coord pos
+	    double wcoord[] = new double[4];// wx, wy, wz;// returned xyz coords
+		
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT );
+		if (mouse != null)
+	    {
+			camera.setMouse(null);
+			
+			gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
+	        gl.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, mvmatrix, 0);
+	        gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, projmatrix, 0);
+			int x = mouse.getX(), y = mouse.getY();
+	   
+	        realy = viewport[3] - (int) y - 1;
+	        System.out.println("Coordinates at cursor are (" + x + ", " + realy);
+	        glu.gluUnProject((double) x, (double) realy, 0.0, //
+	            mvmatrix, 0,
+	            projmatrix, 0, 
+	            viewport, 0, 
+	            wcoord, 0);
+	        System.out.println("World coords at z=0.0 are ( " //
+	                           + wcoord[0] + ", " + wcoord[1] + ", " + wcoord[2]
+	                           + ")");
+	        float nearv[] = {(float)wcoord[0], (float)wcoord[1], (float)wcoord[2]};
+	        glu.gluUnProject((double) x, (double) realy, 1.0, //
+	            mvmatrix, 0,
+	            projmatrix, 0,
+	            viewport, 0, 
+	            wcoord, 0);
+	        System.out.println("World coords at z=1.0 are (" //
+	                           + wcoord[0] + ", " + wcoord[1] + ", " + wcoord[2]
+	                           + ")");
+	        
+	        float farv[] = {(float)wcoord[0], (float)wcoord[1], (float)wcoord[2]};  // already computed as above
+
+//	        nearv[0] = 0.0f;
+//	        nearv[1] = 0.0f;
+//	        nearv[2] = 0.0f;
+	        
+	        if(nearv[1] == farv[1])     // this means we have no solutions
+	           return;
+	        float halfSizeRaster = (float)renderMap.getSizeRaster() / 2;
+	        float t = (nearv[1] + halfSizeRaster) / (nearv[1] - farv[1]);
+
+	        // so here are the desired (x, y) coordinates
+	        float nx = nearv[0] + (farv[0] - nearv[0]) * t,
+	                nz = nearv[2] + (farv[2] - nearv[2]) * t;
+	        System.out.println("World coords (" //
+                    + nx + ", " + 0.0 + ", " + nz + ")");
+	    }
 		
 		drawBase(gl);
 		drawGrid(gl);
 		drawObsticles(gl);
 		
 		gl.glLoadIdentity();
-		gl.glTranslatef( 0.0f, 0.0f, -5.0f ); 
+		gl.glTranslatef( 0.0f, 0.0f, 0.0f ); 
 		
 		glu.gluLookAt(camera.getPointPos().getX(), camera.getPointPos().getY(), camera.getPointPos().getZ(),
 					  camera.getPointCenter().getX(), camera.getPointCenter().getY(), camera.getPointCenter().getZ(),
 					  camera.getVectorUp().getX(), camera.getVectorUp().getY(), camera.getVectorUp().getZ());
 		
+		
+		
+		
+		
 		gl.glFlush();
-				
 	}
 	
 	@Override
@@ -122,6 +180,7 @@ public class Render implements GLEventListener{
 		
 		gl.glEnable(GL2.GL_LIGHT0);
 		gl.glEnable(GL2.GL_LIGHTING);
+		gl.glLoadIdentity();
 	}
 		
 	@Override
@@ -154,7 +213,7 @@ public class Render implements GLEventListener{
 		
 	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster, -halfSizeRaster ); 
 	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster );
-	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster , -halfSizeRaster, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster);
+	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster);
 	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster, -halfSizeRaster );
 	    
 	    gl.glEnd();
