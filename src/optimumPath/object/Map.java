@@ -176,6 +176,16 @@ public class Map {
 		}
 	}
 	
+	public boolean isPointInMap(Point3d point) {
+		boolean inRangeX = point.getX() >= 0 && point.getX() < sizeX;
+		boolean inRangeY = point.getY() >= 0 && point.getY() < sizeY;
+		boolean inRangeZ = point.getZ() >= 0 && point.getZ() < sizeZ;
+		
+		if (inRangeX && inRangeY && inRangeZ)
+			return true;
+		return false;
+	}
+	
 	////////////////////////////////////
 	// getters and setters
 	

@@ -28,6 +28,7 @@ import optimumPath.common.*;
 public class Render implements GLEventListener{
 
 	private Map renderMap;
+	private MapEdition editionMap;
 	private Camera camera;
 	private GLU glu;
     final private GLCanvas glcanvas;
@@ -42,12 +43,12 @@ public class Render implements GLEventListener{
 	    final GLProfile profile = GLProfile.get(GLProfile.GL2);
 	    GLCapabilities capabilities = new GLCapabilities(profile);
 	    
-		
 	    this.camera = new Camera();		// Kamera dla glcanvas
 	    this.renderMap = new Map();  	// Mapa zawierj¹ca informacje o przeszkodach œcie¿ce itp.
+	    this.editionMap = new MapEdition();
 	    this.glcanvas = new GLCanvas(capabilities); // canvas
 	    this.glu = new GLU();  		// glu
-	    
+		    
 	    // inicjalizacja prametrow
 	    camera.setPointPos(new Point3d(0.0, 0.0, 5.0));
 		
@@ -55,6 +56,9 @@ public class Render implements GLEventListener{
 	    glcanvas.addMouseListener(camera);
 	    glcanvas.addMouseMotionListener(camera);
 	    glcanvas.addMouseWheelListener(camera);
+	    
+	    glcanvas.addMouseListener(editionMap);
+	    glcanvas.addMouseMotionListener(editionMap);
 	    glcanvas.setSize(100, 100);
 	    
 		final FPSAnimator animator = new FPSAnimator(glcanvas, 300, true);
@@ -66,67 +70,22 @@ public class Render implements GLEventListener{
 	
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		MouseEvent mouse = camera.getMouse();
-		
-		
-		int viewport[] = new int[4];
-	    double mvmatrix[] = new double[16];
-	    double projmatrix[] = new double[16];
-	    int realy = 0;// GL y coord pos
-	    double wcoord[] = new double[4];// wx, wy, wz;// returned xyz coords
+		//MouseEvent mouse = camera.getMouse();
 		
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT );
-		if (mouse != null)
-	    {
-			camera.setMouse(null);
-			
-			gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
-	        gl.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, mvmatrix, 0);
-	        gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, projmatrix, 0);
-			int x = mouse.getX(), y = mouse.getY();
-	   
-	        realy = viewport[3] - (int) y - 1;
-	        System.out.println("Coordinates at cursor are (" + x + ", " + realy);
-	        glu.gluUnProject((double) x, (double) realy, 0.0, //
-	            mvmatrix, 0,
-	            projmatrix, 0, 
-	            viewport, 0, 
-	            wcoord, 0);
-	        System.out.println("World coords at z=0.0 are ( " //
-	                           + wcoord[0] + ", " + wcoord[1] + ", " + wcoord[2]
-	                           + ")");
-	        float nearv[] = {(float)wcoord[0], (float)wcoord[1], (float)wcoord[2]};
-	        glu.gluUnProject((double) x, (double) realy, 1.0, //
-	            mvmatrix, 0,
-	            projmatrix, 0,
-	            viewport, 0, 
-	            wcoord, 0);
-	        System.out.println("World coords at z=1.0 are (" //
-	                           + wcoord[0] + ", " + wcoord[1] + ", " + wcoord[2]
-	                           + ")");
-	        
-	        float farv[] = {(float)wcoord[0], (float)wcoord[1], (float)wcoord[2]};  // already computed as above
-
-//	        nearv[0] = 0.0f;
-//	        nearv[1] = 0.0f;
-//	        nearv[2] = 0.0f;
-	        
-	        if(nearv[1] == farv[1])     // this means we have no solutions
-	           return;
-	        float halfSizeRaster = (float)renderMap.getSizeRaster() / 2;
-	        float t = (nearv[1] + halfSizeRaster) / (nearv[1] - farv[1]);
-
-	        // so here are the desired (x, y) coordinates
-	        float nx = nearv[0] + (farv[0] - nearv[0]) * t,
-	                nz = nearv[2] + (farv[2] - nearv[2]) * t;
-	        System.out.println("World coords (" //
-                    + nx + ", " + 0.0 + ", " + nz + ")");
-	    }
+		
+		if (editionMap.isClicked() && isMapCreation) {
+			editionMap.getCoordinatesFromCanvas(gl, glu);
+			Point3d raster = editionMap.getPointRaster(renderMap.getSizeRaster(), offsetLayer);
+			if(renderMap.isPointInMap(raster))
+				renderMap.setRaster((int)raster.getX(), (int)raster.getY(), (int)raster.getZ(), Map.Raster.OBSTACLE);
+		}
 		
 		drawBase(gl);
 		drawGrid(gl);
 		drawObsticles(gl);
+		drawStratEnd(gl);
 		
 		gl.glLoadIdentity();
 		gl.glTranslatef( 0.0f, 0.0f, 0.0f ); 
@@ -134,10 +93,6 @@ public class Render implements GLEventListener{
 		glu.gluLookAt(camera.getPointPos().getX(), camera.getPointPos().getY(), camera.getPointPos().getZ(),
 					  camera.getPointCenter().getX(), camera.getPointCenter().getY(), camera.getPointCenter().getZ(),
 					  camera.getVectorUp().getX(), camera.getVectorUp().getY(), camera.getVectorUp().getZ());
-		
-		
-		
-		
 		
 		gl.glFlush();
 	}
@@ -164,6 +119,7 @@ public class Render implements GLEventListener{
 		//gl.glEnable (GL2.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
 		//gl.glMaterialf(GL2.GL_SHININESS, 100.0);
+		
 		//definicja œwiat³a
 		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -285,6 +241,32 @@ public class Render implements GLEventListener{
 			glut.glutSolidCube((float)renderMap.getSizeRaster());
 			gl.glPopMatrix();
 		}
+	}
+	
+	public void drawStratEnd(GL2 gl) {
+		GLUT glut = new GLUT();
+		
+		float mat_diffuse1[] = { 1.0f, 0.8f, 0.1f, 1.0f };
+		float mat_diffuse2[] = { 1.0f, 0.2f, 0.1f, 1.0f };
+		
+		if (renderMap.isStart()) {
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse1, 0);
+			Point3d translate = renderMap.getStartShift();
+			gl.glPushMatrix();
+			gl.glTranslatef((float)translate.getX(), (float)translate.getY(), (float)translate.getZ());
+			glut.glutSolidCube((float)renderMap.getSizeRaster());
+			gl.glPopMatrix();
+		}
+		
+		if (renderMap.isEnd()) {
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse2, 0);
+			Point3d translate = renderMap.getEndShift();
+			gl.glPushMatrix();
+			gl.glTranslatef((float)translate.getX(), (float)translate.getY(), (float)translate.getZ());
+			glut.glutSolidCube((float)renderMap.getSizeRaster());
+			gl.glPopMatrix();
+		}
+			
 	}
 	
 	////////////////////////////////////////

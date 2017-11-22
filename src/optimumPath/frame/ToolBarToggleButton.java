@@ -1,16 +1,16 @@
 package optimumPath.frame;
 
-import javax.swing.JButton;
+import javax.swing.JToggleButton;
 import java.awt.Dimension;
 
 
-public class ToolBarButton extends JButton {
+public class ToolBarToggleButton extends JToggleButton {
 	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6468386861235189417L;
-	
+	private static final long serialVersionUID = -5571416812761639310L;
+
 	@Override
 	public Dimension getMaximumSize() {
 		return new Dimension(30,30);

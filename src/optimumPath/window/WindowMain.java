@@ -2,6 +2,7 @@ package optimumPath.window;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
@@ -67,6 +69,12 @@ public class WindowMain extends JFrame {
 	//Create a file chooser
 	final private JFileChooser fc;
 	private JFrame windowMain = this;
+	private JToggleButton btnObst;
+	private JToggleButton btnDelObst;
+	private JToggleButton btnStart;
+	private JToggleButton btnEnd;
+	private ToolBarButton btnHelp;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
 	
 	/**
 	 * G³ówna aplikacja.
@@ -290,11 +298,18 @@ public class WindowMain extends JFrame {
 		///////////////////////////////////////////////////
 		// Pasek narzêdzi
 		
+		//Dimension toolBarButtonSize = new Dimension(30, 30);
+		JPanel panelTool = new JPanel();
+		contentPanel.add(panelTool, BorderLayout.NORTH);
+		panelTool.setLayout(new BorderLayout(0, 0));
+		//panelTool.setMinimumSize(toolBarButtonSize);
+		//panelTool.setPreferredSize(toolBarButtonSize);
+		
 		JToolBar toolBar = new JToolBar();
 		toolBar.setFloatable(false);
 		toolBar.setRollover(true);
-		
-		contentPanel.add(toolBar, BorderLayout.NORTH);
+			
+		panelTool.add(toolBar);
 		
 		btnNewMap = new ToolBarButton();
 		btnNewMap.setToolTipText("Nowa mapa");
@@ -302,18 +317,48 @@ public class WindowMain extends JFrame {
 		btnSaveMap.setToolTipText("Zapisz mape");
 		btnLoadMap = new ToolBarButton();
 		btnLoadMap.setToolTipText("Wczytaj mape");
+		
+		btnHelp = new ToolBarButton();
+		btnHelp.setToolTipText("Pomoc");
 		btnExit = new ToolBarButton();
 		btnExit.setToolTipText("Zamknij program");
 		
-		btnNewMap.setIcon(new ImageIcon("toolbar_icons/New.gif"));
-		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/Save.gif"));
-		btnLoadMap.setIcon(new ImageIcon("toolbar_icons/Load.gif"));
-		btnExit.setIcon(new ImageIcon("toolbar_icons/Exit.gif"));
+		btnObst = new ToolBarToggleButton();
+		btnObst.setSelected(true);
+		buttonGroup.add(btnObst);
+		btnObst.setToolTipText("Rysuj przeszkodê");
+		btnDelObst = new ToolBarToggleButton();
+		buttonGroup.add(btnDelObst);
+		btnDelObst.setToolTipText("Usuñ przeszkodê");
+		btnStart = new ToolBarToggleButton();
+		buttonGroup.add(btnStart);
+		btnStart.setToolTipText("Zaznacz punkt startowy");
+		btnEnd = new ToolBarToggleButton();
+		buttonGroup.add(btnEnd);
+		btnEnd.setToolTipText("Zaznacz punkt koñcowy");
+		
+		btnNewMap.setIcon(new ImageIcon("toolbar_icons/new.png"));
+		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/save.png"));
+		btnLoadMap.setIcon(new ImageIcon("toolbar_icons/open.png"));
+		
+		btnObst.setIcon(new ImageIcon("toolbar_icons/obst.png"));
+		btnDelObst.setIcon(new ImageIcon("toolbar_icons/delobst.png"));
+		btnStart.setIcon(new ImageIcon("toolbar_icons/start.png"));
+		btnEnd.setIcon(new ImageIcon("toolbar_icons/finish.png"));
+		
+		btnHelp.setIcon(new ImageIcon("toolbar_icons/help.png"));
+		btnExit.setIcon(new ImageIcon("toolbar_icons/exit.png"));
 		
 		toolBar.add(btnNewMap);
 		toolBar.add(btnSaveMap);
 		toolBar.add(btnLoadMap);
 		toolBar.addSeparator();
+		toolBar.add(btnObst);
+		toolBar.add(btnDelObst);
+		toolBar.add(btnStart);
+		toolBar.add(btnEnd);
+		toolBar.addSeparator();
+		toolBar.add(btnHelp);
 		toolBar.add(btnExit);
 		
 		GLpanel = new JPanel();

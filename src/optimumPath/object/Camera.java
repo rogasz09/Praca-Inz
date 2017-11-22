@@ -315,10 +315,7 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 	// Niewykorzystane metody
 	
 	@Override
-	public void mouseMoved(MouseEvent e) {
-		//System.out.println(e.getX());
-		//System.out.println(e.getY());
-	}
+	public void mouseMoved(MouseEvent e) {}
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {}
