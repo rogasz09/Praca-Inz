@@ -4,8 +4,11 @@
 package optimumPath.opengl;
 
 
+import java.awt.Color;
 import java.awt.DisplayMode;
-import java.awt.event.MouseEvent;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -16,6 +19,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.GLBuffers;
 
 import optimumPath.object.*;
 import optimumPath.common.*;
@@ -67,7 +71,6 @@ public class Render implements GLEventListener{
 	}
 	
 	
-	
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		//MouseEvent mouse = camera.getMouse();
@@ -75,17 +78,20 @@ public class Render implements GLEventListener{
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT );
 		
-		if (editionMap.isClicked() && isMapCreation) {
+		if (editionMap.isClicked() && isMapCreation && editionMap.getMouseButton() == 1) {
 			editionMap.getCoordinatesFromCanvas(gl, glu);
-			Point3d raster = editionMap.getPointRaster(renderMap.getSizeRaster(), offsetLayer);
-			if(renderMap.isPointInMap(raster))
-				renderMap.setRaster((int)raster.getX(), (int)raster.getY(), (int)raster.getZ(), Map.Raster.OBSTACLE);
+			editionMap.modifcationMap(renderMap, offsetLayer);
 		}
 		
-		drawBase(gl);
-		drawGrid(gl);
+		drawBase(gl, 0, 1.0f);
+		if (isMapCreation)
+			drawGrid(gl, offsetLayer+1);
+		else
+			drawGrid(gl, 0);
+		
 		drawObsticles(gl);
 		drawStratEnd(gl);
+		drawPath(gl);
 		
 		gl.glLoadIdentity();
 		gl.glTranslatef( 0.0f, 0.0f, 0.0f ); 
@@ -158,19 +164,20 @@ public class Render implements GLEventListener{
 	
 	///////////////////////////////////////////////////
 	// rysowanie podstawy
-	public void drawBase(GL2 gl) {
+	public void drawBase(GL2 gl, int layer, float transparency) {
 		
-		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, 1.0f };
+		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, transparency };
 		float halfSizeRaster = (float)renderMap.getSizeRaster() / 2;
+		float offset = (float)layer*(float)renderMap.getSizeRaster();
 		
 		gl.glPushMatrix();
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 		gl.glBegin( GL2.GL_QUADS );
 		
-	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster, -halfSizeRaster ); 
-	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster );
-	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster);
-	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster, -halfSizeRaster );
+	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster+offset, -halfSizeRaster ); 
+	    gl.glVertex3f( -halfSizeRaster, -halfSizeRaster+offset, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster );
+	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster+offset, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster);
+	    gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster+offset, -halfSizeRaster );
 	    
 	    gl.glEnd();
 		gl.glPopMatrix();
@@ -178,10 +185,11 @@ public class Render implements GLEventListener{
 	
 	////////////////////////
 	// rysowanie siatki
-	public void drawGrid(GL2 gl) {
+	public void drawGrid(GL2 gl, int layer) {
 		
 		float mat_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float halfSizeRaster = (float)renderMap.getSizeRaster() / 2;
+		float offset = (float)layer*(float)renderMap.getSizeRaster();
 		
 		gl.glPushMatrix();
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
@@ -189,8 +197,8 @@ public class Render implements GLEventListener{
 		for (int i = 0; i < renderMap.getSizeX() + 1; i++) {
 			gl.glBegin( GL2.GL_LINES );
 			
-			gl.glVertex3f( -halfSizeRaster + i*(float)renderMap.getSizeRaster(), -halfSizeRaster+0.002f, -halfSizeRaster );
-			gl.glVertex3f( -halfSizeRaster + i*(float)renderMap.getSizeRaster(), -halfSizeRaster+0.002f, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster );
+			gl.glVertex3f( -halfSizeRaster + i*(float)renderMap.getSizeRaster(), -halfSizeRaster+0.002f+offset, -halfSizeRaster );
+			gl.glVertex3f( -halfSizeRaster + i*(float)renderMap.getSizeRaster(), -halfSizeRaster+0.002f+offset, (float)renderMap.getSizeRaster()*(float)renderMap.getSizeY()-halfSizeRaster );
 			
 			gl.glEnd();
 		}
@@ -198,8 +206,8 @@ public class Render implements GLEventListener{
 		for (int i = 0; i < renderMap.getSizeY() + 1; i++) {
 			gl.glBegin( GL2.GL_LINES );
 			
-			gl.glVertex3f( -halfSizeRaster, -halfSizeRaster+0.002f, -halfSizeRaster + i*(float)renderMap.getSizeRaster());
-			gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster+0.002f, -halfSizeRaster + i*(float)renderMap.getSizeRaster());
+			gl.glVertex3f( -halfSizeRaster, -halfSizeRaster+0.002f+offset, -halfSizeRaster + i*(float)renderMap.getSizeRaster());
+			gl.glVertex3f( (float)renderMap.getSizeRaster()*(float)renderMap.getSizeX()-halfSizeRaster, -halfSizeRaster+0.002f+offset, -halfSizeRaster + i*(float)renderMap.getSizeRaster());
 			
 			gl.glEnd();
 		}
@@ -243,6 +251,8 @@ public class Render implements GLEventListener{
 		}
 	}
 	
+	/////////////////////////////////
+	// rysowanie punktu start i stop
 	public void drawStratEnd(GL2 gl) {
 		GLUT glut = new GLUT();
 		
@@ -267,6 +277,54 @@ public class Render implements GLEventListener{
 			gl.glPopMatrix();
 		}
 			
+	}
+	
+	////////////////////////
+	// rysowanie œcie¿ki
+	public void drawPath(GL2 gl) {
+		GLUT glut = new GLUT();
+		
+		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.9f }; //kolor, ostatni parametr okresla przezroczystosc
+		
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_diffuse, 0);
+		
+		for (int index = 0; index < renderMap.getPathShift().size(); index++) {
+			//kostka o okreœlonym materiale
+			Point3d translate = renderMap.getObstacleShift().get(index);
+			
+			gl.glPushMatrix();
+			gl.glTranslatef((float)translate.getX(), (float)translate.getY(), (float)translate.getZ());
+			glut.glutSolidCube((float)renderMap.getSizeRaster());
+			gl.glPopMatrix();
+		}
+	}
+		
+	public BufferedImage saveImage(GL2 gl2, int width, int height) {
+
+		BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics graphics = screenshot.getGraphics();
+
+		ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
+		// be sure you are reading from the right fbo (here is supposed to be the default one)
+		// bind the right buffer to read from
+		gl2.glReadBuffer(GL2.GL_BACK);
+		// if the width is not multiple of 4, set unpackPixel = 1
+		gl2.glReadPixels(0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+
+		for (int h = 0; h < height; h++) {
+		    for (int w = 0; w < width; w++) {
+		        // The color are the three consecutive bytes, it's like referencing
+		        // to the next consecutive array elements, so we got red, green, blue..
+		        // red, green, blue, and so on..+ ", "
+		        graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
+		                (buffer.get() & 0xff)));
+		        buffer.get();   // consume alpha
+		        graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
+		    }
+		}
+		// This is one util of mine, it make sure you clean the direct buffer
+		//BufferUtils.destroyDirectBuffer(buffer);
+		return screenshot;
 	}
 	
 	////////////////////////////////////////
@@ -316,7 +374,14 @@ public class Render implements GLEventListener{
 		this.isMapCreation = isMapCreation;
 		this.camera.setMapCreation(isMapCreation);
 	}
-	
+
+	public MapEdition getEditionMap() {
+		return editionMap;
+	}
+
+	public void setEditionMap(MapEdition editionMap) {
+		this.editionMap = editionMap;
+	}
 	
 	
 	//////////////////

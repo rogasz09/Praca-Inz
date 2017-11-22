@@ -1,21 +1,24 @@
 package optimumPath.opengl;
 
 import java.awt.event.MouseEvent;
+
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.glu.GLU;
 
-import optimumPath.common.Point3d;
+import optimumPath.common.*;
+import optimumPath.object.Map;
 
 public class MapEdition implements MouseListener, MouseMotionListener{
 
 	private Point3d nearv, farv;
 	private int sx, sy;
-	private boolean isClicked;
+	private int selectedOption;
+	private boolean isClicked, isDragged;
+    private int mouseButton;
+
 	
 	
 	//////////////////////////////
@@ -39,6 +42,22 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 
 	public void setClicked(boolean isClicked) {
 		this.isClicked = isClicked;
+	}
+
+	public int getSelectedOption() {
+		return selectedOption;
+	}
+
+	public void setSelectedOption(int selectedOption) {
+		this.selectedOption = selectedOption;
+	}
+
+	public int getMouseButton() {
+		return mouseButton;
+	}
+
+	public void setMouseButton(int mouseButton) {
+		this.mouseButton = mouseButton;
 	}
 
 	public void getCoordinatesFromCanvas(GL2 gl, GLU glu) {
@@ -76,7 +95,7 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 			return new Point3d();
 		
         double halfSizeRaster = sizeRaster/ 2;
-        double y = layer*sizeRaster - halfSizeRaster;
+        double y = (layer+1)*sizeRaster - halfSizeRaster;
         double t = (nearv.getY() - y) / (nearv.getY() - farv.getY());
 
         // so here are the desired (x, y) coordinates
@@ -85,29 +104,83 @@ public class MapEdition implements MouseListener, MouseMotionListener{
         System.out.println("World coords (" + x + ", " + 0.0 + ", " + z + ")");
         
         x = Math.floor((x + halfSizeRaster)/sizeRaster);
-        y = Math.floor((y + halfSizeRaster)/sizeRaster);
+        y = Math.floor((y + halfSizeRaster)/sizeRaster - 1);
         z = Math.floor((z + halfSizeRaster)/sizeRaster);
         System.out.println("Map coords (" + x + ", " + 0.0 + ", " + z + ")");
         
         return new Point3d(x, z, y);
 	}
 	
+	
+	public void modifcationMap(Map renderMap, int layer) {
+		Point3d raster = getPointRaster(renderMap.getSizeRaster(), layer);
+		
+		if(!renderMap.isPointInMap(raster))
+			return;
+		
+		int x = (int)raster.getX();
+		int y = (int)raster.getY();
+		int z = (int)raster.getZ();
+		
+		switch(selectedOption) {
+			case 0:
+				if(renderMap.getRaster(x, y, z) == Raster.EMPTY)
+					renderMap.setRaster(x, y, z, Raster.OBSTACLE);
+				break;
+			
+			case 1:
+				if(renderMap.getRaster(x, y, z) == Raster.OBSTACLE) {
+					renderMap.setRaster(x, y, z, Raster.EMPTY);
+					renderMap.removeFromlist(renderMap.getObstacleShift(), x, y, z);
+				}
+				break;
+				
+			case 2:
+				if(renderMap.getRaster(x, y, z) == Raster.START) {
+					if (!isDragged) {
+						renderMap.setRaster(x, y, z, Raster.EMPTY);
+						renderMap.setStart(false);
+					}
+				} else
+					if(renderMap.getRaster(x, y, z) == Raster.EMPTY)
+						renderMap.setRaster(x, y, z, Raster.START);
+				break;
+				
+			case 3:
+				if(renderMap.getRaster(x, y, z) == Raster.END) {
+					if (!isDragged) {
+						renderMap.setRaster(x, y, z, Raster.EMPTY);
+						renderMap.setEnd(false);
+					}
+				} else
+					if(renderMap.getRaster(x, y, z) == Raster.EMPTY)
+						renderMap.setRaster(x, y, z, Raster.END);
+				break;
+		}
+		
+		isClicked = false;
+	}
+	
 	///////////////////////////////////////////
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
+		mouseButton = e.getButton();
 		isClicked = true;
 		sx = e.getX();
 		sy = e.getY();
 	}
 	
 	@Override
-	public void mouseReleased(MouseEvent arg0) {
+	public void mouseReleased(MouseEvent e) {
 		isClicked = false;
+		isDragged = false;
 	}
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		isClicked = true;
+		isDragged = true;
 		sx = e.getX();
 		sy = e.getY();
 	}

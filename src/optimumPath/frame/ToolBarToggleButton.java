@@ -9,8 +9,8 @@ public class ToolBarToggleButton extends JToggleButton {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -5571416812761639310L;
-
+	private static final long serialVersionUID = -7614126175724394190L;
+	
 	@Override
 	public Dimension getMaximumSize() {
 		return new Dimension(30,30);
@@ -25,6 +25,5 @@ public class ToolBarToggleButton extends JToggleButton {
 	public Dimension getPreferredSize() {
 		return new Dimension(30,30);
 	}
-	
 	
 }

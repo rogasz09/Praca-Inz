@@ -6,10 +6,6 @@ import java.util.List;
 import optimumPath.common.*;
 
 public class Map {
-
-	public enum Raster {
-	    EMPTY, OBSTACLE, START, END, PATH, FORBIDDEN;
-	}
 	
 	private Raster rasterMap[][][];
 	private int sizeX, sizeY, sizeZ;
@@ -128,12 +124,16 @@ public class Map {
 		makeShiftList();
 	}
 	
-	public Point3d pointFromShift(List<Point3d> List, int index) {
-		Point3d point = List.get(index);
+	public Point3d pointFromShift(Point3d point) {
 		double x = point.getX()/(double)sizeRaster;
 		double y = point.getZ()/(double)sizeRaster;
 		double z = point.getY()/(double)sizeRaster;
 		return new Point3d(x, y, z);
+	}
+	
+	public Point3d pointFromShift(List<Point3d> List, int index) {
+		Point3d point = List.get(index);
+		return pointFromShift(point);
 	}
 	
 	public void makeShift(int x, int y, int z) {
@@ -165,7 +165,7 @@ public class Map {
 		}
 	}
 	
-	public void removeFromlist(ArrayList<Point3d> List, int x, int y, int z) {
+	public void removeFromlist(List<Point3d> List, int x, int y, int z) {
 		double shiftX = (double)x * sizeRaster;
 		double shiftY = (double)z * sizeRaster;
 		double shiftZ = (double)y * sizeRaster;
@@ -192,6 +192,14 @@ public class Map {
 	public void setRaster(int x, int y, int z, Raster type) {
 		if (type == rasterMap[z][y][x])
 			return;
+		if (type == Raster.START) {
+			Point3d raster = this.pointFromShift(startShift);
+			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
+		}
+		if (type == Raster.END) {
+			Point3d raster = this.pointFromShift(endShift);
+			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
+		}
 		
 		this.rasterMap[z][y][x] = type;
 		makeShift(x, y, z);

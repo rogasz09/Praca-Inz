@@ -43,6 +43,7 @@ import optimumPath.opengl.*;
 import optimumPath.object.Map;
 import optimumPath.common.Point3d;
 import optimumPath.JSON.*;
+import java.awt.Component;
 
 
 public class WindowMain extends JFrame {
@@ -69,12 +70,16 @@ public class WindowMain extends JFrame {
 	//Create a file chooser
 	final private JFileChooser fc;
 	private JFrame windowMain = this;
-	private JToggleButton btnObst;
-	private JToggleButton btnDelObst;
-	private JToggleButton btnStart;
-	private JToggleButton btnEnd;
+	private ToolBarToggleButton btnObst;
+	private ToolBarToggleButton btnDelObst;
+	private ToolBarToggleButton btnStart;
+	private ToolBarToggleButton btnEnd;
 	private ToolBarButton btnHelp;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JPanel panelSafe;
+	private JLabel label;
+	private JComboBox comboBox;
+	private ToolBarButton btnSaveScreen;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -156,6 +161,7 @@ public class WindowMain extends JFrame {
 		// Panel mapy
 		
 		JPanel panelMap = new JPanel();
+		panelMap.setAlignmentY(Component.TOP_ALIGNMENT);
 		panelMap.setBorder(new TitledBorder(null, "Mapa", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelOptions.add(panelMap);
 		
@@ -182,7 +188,7 @@ public class WindowMain extends JFrame {
 						.addGroup(gl_panelMap.createSequentialGroup()
 							.addComponent(lblWarstwa)
 							.addGap(18)
-							.addComponent(spnLayer, GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
+							.addComponent(spnLayer, GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE))
 						.addComponent(rdbtnMapMod)
 						.addComponent(rdbtnPreview))
 					.addContainerGap())
@@ -190,14 +196,14 @@ public class WindowMain extends JFrame {
 		gl_panelMap.setVerticalGroup(
 			gl_panelMap.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_panelMap.createSequentialGroup()
-					.addContainerGap(10, Short.MAX_VALUE)
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 					.addComponent(rdbtnPreview)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(rdbtnMapMod)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panelMap.createParallelGroup(Alignment.BASELINE)
-						.addComponent(spnLayer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblWarstwa))
+					.addGap(18)
+					.addGroup(gl_panelMap.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblWarstwa)
+						.addComponent(spnLayer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addContainerGap())
 		);
 		panelMap.setLayout(gl_panelMap);
@@ -206,6 +212,7 @@ public class WindowMain extends JFrame {
 		// Panel algorytmów
 		
 		JPanel panelAlg = new JPanel();
+		panelAlg.setAlignmentY(Component.TOP_ALIGNMENT);
 		panelAlg.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Algorytmy", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		panelAlg.setToolTipText("");
 		panelOptions.add(panelAlg);
@@ -252,6 +259,49 @@ public class WindowMain extends JFrame {
 		);
 		panelAlg.setLayout(gl_panelAlg);
 		
+		panelSafe = new JPanel();
+		panelSafe.setAlignmentY(Component.TOP_ALIGNMENT);
+		panelSafe.setBorder(new TitledBorder(null, "Strefa bezpiecze\u0144stwa", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panelOptions.add(panelSafe);
+		
+		label = new JLabel("Rodzaj strefy bezpiecze\u0144stwa:");
+		
+		comboBox = new JComboBox();
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Brak", "Wok\u00F3\u0142 robota", "Wok\u00F3\u0142 przeszk\u00F3d"}));
+		
+		JSpinner spinner = new JSpinner();
+		spinner.setModel(new SpinnerNumberModel(0, 0, 3, 1));
+		
+		JLabel lblWielkoStrefy = new JLabel("Wielko\u015B\u0107 strefy:");
+		GroupLayout gl_panelSafe = new GroupLayout(panelSafe);
+		gl_panelSafe.setHorizontalGroup(
+			gl_panelSafe.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSafe.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panelSafe.createParallelGroup(Alignment.LEADING)
+						.addComponent(label, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
+						.addComponent(comboBox, 0, 207, Short.MAX_VALUE)
+						.addGroup(gl_panelSafe.createSequentialGroup()
+							.addComponent(lblWielkoStrefy)
+							.addPreferredGap(ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
+							.addComponent(spinner, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)))
+					.addContainerGap())
+		);
+		gl_panelSafe.setVerticalGroup(
+			gl_panelSafe.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSafe.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(label)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_panelSafe.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblWielkoStrefy)
+						.addComponent(spinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(103, Short.MAX_VALUE))
+		);
+		panelSafe.setLayout(gl_panelSafe);
+		
 		///////////////////////////////////////////////////
 		// Panel animacji
 		
@@ -275,23 +325,28 @@ public class WindowMain extends JFrame {
 		gl_panelAnim.setHorizontalGroup(
 			gl_panelAnim.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelAnim.createSequentialGroup()
-					.addGap(22)
 					.addGroup(gl_panelAnim.createParallelGroup(Alignment.LEADING)
-						.addComponent(lblSzybko)
-						.addComponent(btnApply)
-						.addComponent(sliderAnimSpeed, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
+						.addGroup(gl_panelAnim.createSequentialGroup()
+							.addGap(22)
+							.addComponent(lblSzybko))
+						.addGroup(gl_panelAnim.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(sliderAnimSpeed, GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
+						.addGroup(Alignment.TRAILING, gl_panelAnim.createSequentialGroup()
+							.addContainerGap(138, Short.MAX_VALUE)
+							.addComponent(btnApply)))
 					.addContainerGap())
 		);
 		gl_panelAnim.setVerticalGroup(
 			gl_panelAnim.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelAnim.createSequentialGroup()
-					.addGap(27)
+					.addContainerGap()
 					.addComponent(lblSzybko)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(sliderAnimSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
+					.addComponent(sliderAnimSpeed, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGap(18)
 					.addComponent(btnApply)
-					.addGap(20))
+					.addGap(88))
 		);
 		panelAnim.setLayout(gl_panelAnim);
 		
@@ -324,7 +379,6 @@ public class WindowMain extends JFrame {
 		btnExit.setToolTipText("Zamknij program");
 		
 		btnObst = new ToolBarToggleButton();
-		btnObst.setSelected(true);
 		buttonGroup.add(btnObst);
 		btnObst.setToolTipText("Rysuj przeszkodê");
 		btnDelObst = new ToolBarToggleButton();
@@ -336,6 +390,8 @@ public class WindowMain extends JFrame {
 		btnEnd = new ToolBarToggleButton();
 		buttonGroup.add(btnEnd);
 		btnEnd.setToolTipText("Zaznacz punkt koñcowy");
+		
+		buttonGroup.setSelected(btnObst.getModel(), true);
 		
 		btnNewMap.setIcon(new ImageIcon("toolbar_icons/new.png"));
 		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/save.png"));
@@ -358,11 +414,16 @@ public class WindowMain extends JFrame {
 		toolBar.add(btnStart);
 		toolBar.add(btnEnd);
 		toolBar.addSeparator();
+		
+		btnSaveScreen = new ToolBarButton();
+		btnSaveScreen.setToolTipText("Pomoc");
+		toolBar.add(btnSaveScreen);
 		toolBar.add(btnHelp);
 		toolBar.add(btnExit);
 		
 		GLpanel = new JPanel();
 		contentPanel.add(GLpanel, BorderLayout.CENTER);
+		
 	}
 	
 	public void initLayerSpinner() {
@@ -399,66 +460,19 @@ public class WindowMain extends JFrame {
 		} else
 			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.01 ));
 	}
+
 	
-	public void createTemplateMap() {
-		//---------------------------------
-		//kod tymczasowy
-		//inicjalizacja mapy
-		int testMap[][][] = 
-			{{{1, 1, 1, 0, 1, 1, 0, 0, 0, 1},
-			  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-		      {1, 1, 1, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 1, 1}},
-					
-			 {{1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 1, 0, 0, 1, 1, 0, 0, 0, 0},
-			  {1, 0, 1, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
-			 
-		     {{0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 1, 1, 0, 0, 0, 0}},
-		     
-		     {{0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-		      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-			  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1}}};
-		
-		for(int z = 0; z < 4; z++)
-			for(int y = 0; y < 10; y++)
-				for(int x = 0; x < 10; x++) {
-					if (testMap[z][y][x] == 1) 
-						render.getRenderMap().setRaster(x, y, z, Map.Raster.OBSTACLE);
-				}
-					
-		render.getRenderMap().makeShiftList();
+	public int getSelectedToolbarButton() {
+		if (buttonGroup.isSelected(btnObst.getModel()))
+			return 0;
+		if (buttonGroup.isSelected(btnDelObst.getModel()))
+			return 1;
+		if (buttonGroup.isSelected(btnStart.getModel()))
+			return 2;
+		if (buttonGroup.isSelected(btnEnd.getModel()))
+			return 3;
+		return -1;
 	}
-	
 	
 	///////////////////////////////////////////////////////////////////
 	// Metoda zawieraj¹ca kod tworz¹cy event'y komponetów
@@ -487,7 +501,6 @@ public class WindowMain extends JFrame {
 				render.getRenderMap().initMap();
 				setCameraToCenter(0);
 				initLayerSpinner();
-				createTemplateMap();
 			}
 		});
 		
@@ -571,6 +584,16 @@ public class WindowMain extends JFrame {
 				setOffsetMap();
 			}
 		});
+		
+		btnObst.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				render.getEditionMap().setSelectedOption(getSelectedToolbarButton());
+			}
+		});
+		
+		btnDelObst.addActionListener(btnObst.getActionListeners()[0]);
+		btnStart.addActionListener(btnObst.getActionListeners()[0]);
+		btnEnd.addActionListener(btnObst.getActionListeners()[0]);
 	}
 
 	public JPanel getGLpanel() {
