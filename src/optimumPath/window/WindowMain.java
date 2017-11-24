@@ -3,8 +3,12 @@ package optimumPath.window;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
@@ -13,11 +17,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JButton;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.ToolTipManager;
 import javax.swing.border.TitledBorder;
 
 import javax.swing.ImageIcon;
@@ -26,6 +32,7 @@ import javax.swing.JFileChooser;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JSpinner;
@@ -80,6 +87,8 @@ public class WindowMain extends JFrame {
 	private JLabel label;
 	private JComboBox comboBox;
 	private ToolBarButton btnSaveScreen;
+	private ToolBarButton btnCopyLayer;
+	private ToolBarButton btnPasteLayer;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -99,11 +108,12 @@ public class WindowMain extends JFrame {
 		setCameraToCenter(0);
 		
 		initComponents();
+		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
 		createEvents();
 		initLayerSpinner();
 		
 		//wpiêcie okna opengl do JPanel
-		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
+		//
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -111,6 +121,11 @@ public class WindowMain extends JFrame {
 	/////////////////////////////////////////////////////////////////////
 	
 	private void initComponents() {
+		
+		// usatwienie ToolTip oraz JPopupMenu jako komponentów HeavyWeight
+		// naprawia problem chowaj¹cego siê menu i podpowiedzi przycisków pod glcanvas
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false); // for tooltips
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false); // for menus and pop-ups
 		
 		///////////////////////////////////////////////////
 		// Menu
@@ -350,6 +365,9 @@ public class WindowMain extends JFrame {
 		);
 		panelAnim.setLayout(gl_panelAnim);
 		
+		GLpanel = new JPanel();
+		contentPanel.add(GLpanel, BorderLayout.CENTER);
+		
 		///////////////////////////////////////////////////
 		// Pasek narzêdzi
 		
@@ -373,6 +391,13 @@ public class WindowMain extends JFrame {
 		btnLoadMap = new ToolBarButton();
 		btnLoadMap.setToolTipText("Wczytaj mape");
 		
+		btnCopyLayer = new ToolBarButton();
+		btnCopyLayer.setToolTipText("Kopiuj modyfikowan¹ warstwê");
+		btnPasteLayer = new ToolBarButton();
+		btnPasteLayer.setToolTipText("Wklej modyfikowan¹ warstwê");
+		
+		btnSaveScreen = new ToolBarButton();
+		btnSaveScreen.setToolTipText("Zapisz widok");
 		btnHelp = new ToolBarButton();
 		btnHelp.setToolTipText("Pomoc");
 		btnExit = new ToolBarButton();
@@ -402,6 +427,10 @@ public class WindowMain extends JFrame {
 		btnStart.setIcon(new ImageIcon("toolbar_icons/start.png"));
 		btnEnd.setIcon(new ImageIcon("toolbar_icons/finish.png"));
 		
+		btnCopyLayer.setIcon(new ImageIcon("toolbar_icons/copy.png"));
+		btnPasteLayer.setIcon(new ImageIcon("toolbar_icons/paste.png"));
+		
+		btnSaveScreen.setIcon(new ImageIcon("toolbar_icons/camera.png"));
 		btnHelp.setIcon(new ImageIcon("toolbar_icons/help.png"));
 		btnExit.setIcon(new ImageIcon("toolbar_icons/exit.png"));
 		
@@ -414,15 +443,12 @@ public class WindowMain extends JFrame {
 		toolBar.add(btnStart);
 		toolBar.add(btnEnd);
 		toolBar.addSeparator();
-		
-		btnSaveScreen = new ToolBarButton();
-		btnSaveScreen.setToolTipText("Pomoc");
+		toolBar.add(btnPasteLayer);
+		toolBar.add(btnCopyLayer);
+		toolBar.addSeparator();
 		toolBar.add(btnSaveScreen);
 		toolBar.add(btnHelp);
 		toolBar.add(btnExit);
-		
-		GLpanel = new JPanel();
-		contentPanel.add(GLpanel, BorderLayout.CENTER);
 		
 	}
 	
@@ -458,7 +484,7 @@ public class WindowMain extends JFrame {
 			double pPosZ = lengthY*1.5 - sizeRaster;
 			render.getCamera().setPointPos(new Point3d(pCenterX, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
 		} else
-			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.01 ));
+			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.02 ));
 	}
 
 	
@@ -546,6 +572,28 @@ public class WindowMain extends JFrame {
 			    } else {
 			    	System.out.println("Open command cancelled by user.");
 			    }
+			}
+		});
+		
+		btnSaveScreen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser fc = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG (*.png)", "PNG", "png");
+				fc.setFileFilter(filter);
+				
+				int returnVal = fc.showSaveDialog(windowMain);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+			    	String filePath = fc.getSelectedFile().getPath();
+			    	//This is where a real application would open the file.
+			    	if (fc.getFileFilter().getDescription() == "PNG (*.png)" && !filePath.endsWith(".png"))
+			    		filePath += ".png";
+			    	
+			    	System.out.println("Saving: " + filePath);
+			    	render.saveImage(filePath);
+				} else {
+			    	System.out.println("Save command cancelled by user.");
+			   	}
 			}
 		});
 		

@@ -73,7 +73,7 @@ public class MapEdition implements MouseListener, MouseMotionListener{
         gl.glGetDoublev(GL2.GL_PROJECTION_MATRIX, projmatrix, 0);
         
         realy = viewport[3] - (int) sy - 1;
-        System.out.println(realy);
+        //System.out.println(realy);
         glu.gluUnProject((double) sx, (double) realy, 0.0, mvmatrix, 0,
             projmatrix, 0, 
             viewport, 0, 

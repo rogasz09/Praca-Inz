@@ -8,7 +8,11 @@ import java.awt.Color;
 import java.awt.DisplayMode;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import javax.imageio.ImageIO;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -36,6 +40,7 @@ public class Render implements GLEventListener{
 	private Camera camera;
 	private GLU glu;
     final private GLCanvas glcanvas;
+    private ByteBuffer buffer;
     
     private int offsetLayer = 0;
     private boolean isMapCreation = false;
@@ -52,6 +57,7 @@ public class Render implements GLEventListener{
 	    this.editionMap = new MapEdition();
 	    this.glcanvas = new GLCanvas(capabilities); // canvas
 	    this.glu = new GLU();  		// glu
+	    
 		    
 	    // inicjalizacja prametrow
 	    camera.setPointPos(new Point3d(0.0, 0.0, 5.0));
@@ -101,6 +107,13 @@ public class Render implements GLEventListener{
 					  camera.getVectorUp().getX(), camera.getVectorUp().getY(), camera.getVectorUp().getZ());
 		
 		gl.glFlush();
+		
+		int viewport[] = new int[4];
+		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
+		buffer = GLBuffers.newDirectByteBuffer(viewport[2] * viewport[3] * 4);
+
+        gl.glReadBuffer(GL2.GL_BACK);
+        gl.glReadPixels(0, 0, viewport[2], viewport[3], GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
 	}
 	
 	@Override
@@ -298,33 +311,36 @@ public class Render implements GLEventListener{
 			gl.glPopMatrix();
 		}
 	}
-		
-	public BufferedImage saveImage(GL2 gl2, int width, int height) {
+	
+	public BufferedImage makeScreenshot() {
+		int width = glcanvas.getWidth();
+        int height = glcanvas.getHeight();
 
-		BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		Graphics graphics = screenshot.getGraphics();
+        BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics graphics = screenshot.getGraphics();
 
-		ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
-		// be sure you are reading from the right fbo (here is supposed to be the default one)
-		// bind the right buffer to read from
-		gl2.glReadBuffer(GL2.GL_BACK);
-		// if the width is not multiple of 4, set unpackPixel = 1
-		gl2.glReadPixels(0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
+                        (buffer.get() & 0xff)));
+                buffer.get();   
+                graphics.drawRect(w, height - h, 1, 1);
+            }
+        }
 
-		for (int h = 0; h < height; h++) {
-		    for (int w = 0; w < width; w++) {
-		        // The color are the three consecutive bytes, it's like referencing
-		        // to the next consecutive array elements, so we got red, green, blue..
-		        // red, green, blue, and so on..+ ", "
-		        graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
-		                (buffer.get() & 0xff)));
-		        buffer.get();   // consume alpha
-		        graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
-		    }
-		}
-		// This is one util of mine, it make sure you clean the direct buffer
-		//BufferUtils.destroyDirectBuffer(buffer);
-		return screenshot;
+	    
+	    return screenshot;
+	}
+	
+	public void saveImage(String pathFile) {
+		try {
+
+            BufferedImage screenshot = makeScreenshot();
+
+            ImageIO.write(screenshot, "PNG", new File(pathFile));
+        } catch (IOException ex) {
+        	ex.printStackTrace();
+        }
 	}
 	
 	////////////////////////////////////////
