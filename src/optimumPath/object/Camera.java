@@ -108,6 +108,25 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 		beta = prevBeta;
     }
     
+    
+    //czyszczenie pamieci starej kamery
+    public void clearPrevCamera() {
+    	// czyszcenie punktow kamery
+    	prevPointPos = null;
+		prevPointCenter = null;
+		prevVectorUp = null;
+		// czyszcenia alfa i beta
+		prevAlfa = 0.0;
+		prevBeta = 0.0;
+    }
+    
+    //sprawdza czy sa zapisane ustawienia kamery
+    public boolean isPrevCamera() {
+    	if (prevPointPos == null && prevPointCenter == null && prevVectorUp == null)
+    		return false;
+    	return true;
+    }
+    
     ///////////////////////////////////////////
     // Obs³uga kamery
     ///////////////////////////////////////////

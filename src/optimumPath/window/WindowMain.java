@@ -51,6 +51,9 @@ import optimumPath.object.Map;
 import optimumPath.common.Point3d;
 import optimumPath.JSON.*;
 import java.awt.Component;
+import javax.swing.JCheckBox;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 
 public class WindowMain extends JFrame {
@@ -89,6 +92,7 @@ public class WindowMain extends JFrame {
 	private ToolBarButton btnSaveScreen;
 	private ToolBarButton btnCopyLayer;
 	private ToolBarButton btnPasteLayer;
+	private JCheckBox cboxAnimation;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -324,44 +328,46 @@ public class WindowMain extends JFrame {
 		panelAnim.setBorder(new TitledBorder(null, "Animacja", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelOptions.add(panelAnim);
 		
-		btnApply = new JButton("Zastosuj");
+		btnApply = new JButton("Wykonaj algorytm");
 		
 		sliderAnimSpeed = new JSlider();
+		sliderAnimSpeed.setMaximum(105);
+		sliderAnimSpeed.setValue(55);
+		sliderAnimSpeed.setMinimum(5);
 		sliderAnimSpeed.setToolTipText("");
 		sliderAnimSpeed.setSnapToTicks(true);
 		sliderAnimSpeed.setPaintTicks(true);
 		sliderAnimSpeed.setPaintLabels(true);
-		sliderAnimSpeed.setMinorTickSpacing(1);
-		sliderAnimSpeed.setValue(5);
-		sliderAnimSpeed.setMaximum(10);
+		sliderAnimSpeed.setMinorTickSpacing(10);
 		
 		JLabel lblSzybko = new JLabel("Szybko\u015B\u0107:");
+		
+		cboxAnimation = new JCheckBox("W\u0142\u0105cz animacje");
+		cboxAnimation.setSelected(true);
 		GroupLayout gl_panelAnim = new GroupLayout(panelAnim);
 		gl_panelAnim.setHorizontalGroup(
 			gl_panelAnim.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelAnim.createSequentialGroup()
+					.addContainerGap()
 					.addGroup(gl_panelAnim.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panelAnim.createSequentialGroup()
-							.addGap(22)
-							.addComponent(lblSzybko))
-						.addGroup(gl_panelAnim.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(sliderAnimSpeed, GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
-						.addGroup(Alignment.TRAILING, gl_panelAnim.createSequentialGroup()
-							.addContainerGap(138, Short.MAX_VALUE)
-							.addComponent(btnApply)))
+						.addComponent(btnApply, Alignment.TRAILING)
+						.addComponent(sliderAnimSpeed, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+						.addComponent(lblSzybko)
+						.addComponent(cboxAnimation))
 					.addContainerGap())
 		);
 		gl_panelAnim.setVerticalGroup(
 			gl_panelAnim.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelAnim.createSequentialGroup()
-					.addContainerGap()
+					.addGap(8)
+					.addComponent(cboxAnimation)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(lblSzybko)
-					.addPreferredGap(ComponentPlacement.RELATED)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(sliderAnimSpeed, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 					.addGap(18)
 					.addComponent(btnApply)
-					.addGap(88))
+					.addGap(53))
 		);
 		panelAnim.setLayout(gl_panelAnim);
 		
@@ -472,19 +478,18 @@ public class WindowMain extends JFrame {
 		double lengthZ = render.getRenderMap().getSizeZ()*sizeRaster;
 		
 		double pCenterX = (lengthX - sizeRaster)/2;
-		double pCenterY = 0.0;
+		double pCenterY = (lengthZ - sizeRaster)/2;
 		double pCenterZ = (lengthY - sizeRaster)/2;
 		
-		System.out.println("w: " + Integer.toString(render.getGlcanvas().getWidth()) + " h: " + Integer.toString(render.getGlcanvas().getHeight()));
-		System.out.println("Test" + Double.toString((lengthZ - sizeRaster) + 2.6*sizeRaster));
-		System.out.println("Test" + Double.toString(((lengthZ - sizeRaster) + 2.6*sizeRaster)*Math.tan(Math.toRadians(45.0))));
 		//usatawienie kamery w œrodku mapy
-		render.getCamera().setPointCenter(new Point3d(pCenterX, 0.0, pCenterZ));
 		if (side == 0) {
-			double pPosZ = lengthY*1.5 - sizeRaster;
+			double pPosZ = lengthY*2.5 - sizeRaster;
+			render.getCamera().setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
 			render.getCamera().setPointPos(new Point3d(pCenterX, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
-		} else
+		} else {
+			render.getCamera().setPointCenter(new Point3d(pCenterX, 0.0, pCenterZ));
 			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.02 ));
+		}
 	}
 
 	
@@ -614,6 +619,7 @@ public class WindowMain extends JFrame {
 				spnLayer.setEnabled(false);
 				render.setMapCreation(false);
 				render.getCamera().loadPrevCamera();
+				render.getCamera().clearPrevCamera();
 			}
 		});
 		
@@ -621,7 +627,9 @@ public class WindowMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				spnLayer.setEnabled(true);
 				render.setMapCreation(true);
-				render.getCamera().saveActualCamera();
+				render.getRenderMap().resetPath();
+				if (!render.getCamera().isPrevCamera())
+					render.getCamera().saveActualCamera();
 				setCameraToCenter(1);
 			}
 		});
@@ -642,6 +650,26 @@ public class WindowMain extends JFrame {
 		btnDelObst.addActionListener(btnObst.getActionListeners()[0]);
 		btnStart.addActionListener(btnObst.getActionListeners()[0]);
 		btnEnd.addActionListener(btnObst.getActionListeners()[0]);
+		
+		
+		btnApply.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				render.setAnimation(cboxAnimation.isSelected());
+				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
+				render.getRenderMap().resetPath();
+				boolean isChebyshev = false;
+				if (cbMetrics.getSelectedIndex() == 1)
+					isChebyshev = true;
+				render.getRenderMap().performAStar(isChebyshev);
+			}
+		});
+		
+		sliderAnimSpeed.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
+			}
+		});
 	}
 
 	public JPanel getGLpanel() {

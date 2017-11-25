@@ -58,7 +58,7 @@ public class WindowNewMap extends JDialog {
 		
 		spnSizeX.setModel(new SpinnerNumberModel(10, 3, 100, 1));
 		spnSizeY.setModel(new SpinnerNumberModel(10, 3, 100, 1));
-		spnSizeZ.setModel(new SpinnerNumberModel(10, 3, 100, 1));
+		spnSizeZ.setModel(new SpinnerNumberModel(10, 1, 100, 1));
 		
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(

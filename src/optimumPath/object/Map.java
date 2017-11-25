@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import optimumPath.common.*;
+import optimumPath.algorithms.*;
 
 public class Map {
 	
@@ -13,10 +14,41 @@ public class Map {
 	
 	private List<Point3d> obstacleShift;
 	private List<Point3d> pathShift;
+	
+	private List<Point3d> openShift;
+	private List<Point3d> closedShift;
+	private Point3d actualShift;
+	
 	private Point3d startShift;
 	private Point3d endShift;
 	
+	//private AStar algorithmAStar;
+	
 	private boolean isStart, isEnd;
+	private boolean isAnimation;
+	private volatile int speedAnimation = 5;
+	
+	
+	////////////////////////////////////
+	// sleep
+	public class AStarPerform implements Runnable {
+		AStar algorithmAStar;
+		boolean isChebyshev;
+		
+		public AStarPerform(AStar algorithmAStar, boolean isChebyshev) {
+		    this.algorithmAStar = algorithmAStar;
+		    this.isChebyshev = isChebyshev;
+		}
+		public void run() {
+			algorithmAStar.perform(isChebyshev);
+			algorithmAStar.writePathToMap(rasterMap);
+			
+			makeShiftList();
+			openShift.clear();
+			closedShift.clear();
+			isAnimation = false;
+		}
+	}
 	
 	////////////////////////////////////
 	// konstruktory klasy Map
@@ -24,13 +56,17 @@ public class Map {
 	public Map() {
 		sizeX = 10;
 		sizeY = 10;
-		sizeZ = 10;
+		sizeZ = 1;
 		sizeRaster = 1.0;
 		
 		obstacleShift = new ArrayList<Point3d>();
 		pathShift = new ArrayList<Point3d>();
 		startShift = new Point3d();
 		endShift = new Point3d();
+		
+		openShift = new ArrayList<Point3d>();
+		closedShift = new ArrayList<Point3d>();
+		actualShift = new Point3d();
 		
 		initMap();
 	}
@@ -45,6 +81,11 @@ public class Map {
 		pathShift = new ArrayList<Point3d>();
 		startShift = new Point3d();
 		endShift = new Point3d();
+		
+		openShift = new ArrayList<Point3d>();
+		closedShift = new ArrayList<Point3d>();
+		actualShift = new Point3d();
+		
 		
 		initMap();
 	}
@@ -97,10 +138,20 @@ public class Map {
 		for(int z = 0; z < sizeZ; z++) {
 			for(int y = 0; y < sizeY; y++) {
 				for(int x = 0; x < sizeX; x++) {
-					if(rasterMap[z][y][x] == Raster.OBSTACLE)
-						intMap[z][y][x] = 1;
-					else
-						intMap[z][y][x] = 0;
+					switch(rasterMap[z][y][x]) {
+						case OBSTACLE:
+							intMap[z][y][x] = 1;
+							break;
+						case START:
+							intMap[z][y][x] = 2;
+							break;
+						case END:
+							intMap[z][y][x] = 3;
+							break;
+						default:
+							intMap[z][y][x] = 0;
+							break;
+					}
 				}
 			}
 		}
@@ -115,8 +166,20 @@ public class Map {
 		for(int z = 0; z < sizeZ; z++) {
 			for(int y = 0; y < sizeY; y++) {
 				for(int x = 0; x < sizeX; x++) {
-					if(intMap[z][y][x] == 1)
-						rasterMap[z][y][x] = Raster.OBSTACLE;
+					switch(intMap[z][y][x]) {
+						case 1:
+							rasterMap[z][y][x] = Raster.OBSTACLE;
+							break;
+						case 2:
+							rasterMap[z][y][x] = Raster.START;
+							break;
+						case 3:
+							rasterMap[z][y][x] = Raster.END;
+							break;
+						default:
+							rasterMap[z][y][x] = Raster.EMPTY;
+							break;
+					}
 				}
 			}
 		}
@@ -134,6 +197,41 @@ public class Map {
 	public Point3d pointFromShift(List<Point3d> List, int index) {
 		Point3d point = List.get(index);
 		return pointFromShift(point);
+	}
+	
+	public void stepAstar(ArrayList<Node> openset, ArrayList<Node> closedset, Node actualNode) {
+		isAnimation = false;
+		openShift.clear();
+		closedShift.clear();
+		
+		for (int i = 0; i < openset.size(); i++) {
+			double shiftX = (double)openset.get(i).getX() * sizeRaster;
+			double shiftY = (double)openset.get(i).getZ() * sizeRaster;
+			double shiftZ = (double)openset.get(i).getY() * sizeRaster;
+			
+			openShift.add(new Point3d(shiftX, shiftY, shiftZ));
+		}
+		
+		for (int i = 0; i < closedset.size(); i++) {
+			double shiftX = (double)closedset.get(i).getX() * sizeRaster;
+			double shiftY = (double)closedset.get(i).getZ() * sizeRaster;
+			double shiftZ = (double)closedset.get(i).getY() * sizeRaster;
+			
+			closedShift.add(new Point3d(shiftX, shiftY, shiftZ));
+		}
+		
+		actualShift = new Point3d((double)actualNode.getX(), (double)actualNode.getZ(), (double)actualNode.getY());
+		isAnimation = true;
+		
+		try {
+	        Thread.sleep(10*this.speedAnimation);
+	    }
+	    catch (Exception e){}
+		
+	}
+	
+	public void printPlus() {
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 	}
 	
 	public void makeShift(int x, int y, int z) {
@@ -186,6 +284,27 @@ public class Map {
 		return false;
 	}
 	
+	
+	/////////////////////////////////////////
+	// WYKONANIE ALGORYTMOW
+	
+	public void performAStar(boolean isChebyshev) {
+		AStar algorithmAStar = new AStar(this, sizeZ, sizeY, sizeX);
+		
+		new Thread(new AStarPerform(algorithmAStar, isChebyshev)).start();
+		//algorithmAStar.perform();
+		
+	}
+	
+	public void resetPath() {
+		for(int i = 0; i < pathShift.size(); i++) {
+			Point3d raster = this.pointFromShift(pathShift.get(i));
+			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
+		}
+		
+		pathShift.clear();
+	}
+	
 	////////////////////////////////////
 	// getters and setters
 	
@@ -226,8 +345,34 @@ public class Map {
 //		this.pathShift.get(index).setPoint(x, y, z);
 //	}
 	
+	
+	
 	public Point3d getStartShift() {
 		return startShift;
+	}
+
+	public List<Point3d> getOpenShift() {
+		return openShift;
+	}
+
+	public void setOpenShift(List<Point3d> openShift) {
+		this.openShift = openShift;
+	}
+
+	public List<Point3d> getClosedShift() {
+		return closedShift;
+	}
+
+	public void setClosedShift(List<Point3d> closedShift) {
+		this.closedShift = closedShift;
+	}
+
+	public Point3d getActualShift() {
+		return actualShift;
+	}
+
+	public void setActualShift(Point3d actualShift) {
+		this.actualShift = actualShift;
 	}
 
 	public void setStartShift(double x, double y, double z) {
@@ -315,6 +460,24 @@ public class Map {
 	public void setEnd(boolean isEnd) {
 		this.isEnd = isEnd;
 	}
+
+	public boolean isAnimation() {
+		return isAnimation;
+	}
+
+	public void setAnimation(boolean isAnimation) {
+		this.isAnimation = isAnimation;
+	}
+
+	public int getSpeedAnimation() {
+		return speedAnimation;
+	}
+
+	public void setSpeedAnimation(int speedAnimation) {
+		this.speedAnimation = speedAnimation;
+	}
+	
+	
 
 	/////////////////////////////////////////////
 	

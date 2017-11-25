@@ -28,8 +28,8 @@ public class Node {
 		
 	}
 	
-	public void setParent(int parentZ, int parentY, int parentX, Raster parenType) {
-		parent = new Node(parentZ, parentY, parentX, parenType);
+	public void setParent(Node parent) {
+		this.parent = parent;
 		
 	}
 	public int getParentZ() {
@@ -46,6 +46,10 @@ public class Node {
 	}
 	public Raster getParentType() {
 		return parent.type;
+	}
+	
+	public Node getParent() {
+		return this.parent;
 	}
 	
 	public int getZ() {
