@@ -99,6 +99,9 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     
     // wczytaj poprzednia pozycje kamery
     public void loadPrevCamera() {
+    	//sprawdza czy jest zapisana kamera
+    	if (prevPointPos == null || prevPointCenter == null || prevVectorUp == null)
+    		return;
     	// wczytanie punktow kamery
     	pointPos = prevPointPos;
 		pointCenter = prevPointCenter;
@@ -288,9 +291,9 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 		int shiftX = prevMouseX - e.getX();
 		int shiftY = prevMouseY - e.getY();
 		Dimension size = e.getComponent().getSize();
-		System.out.println("D³ugoœc wektora view: " + lengthViewVector);
-		System.out.println("Alfa: " + alfa*180/Math.PI);
-		System.out.println("Beta: " + beta*180/Math.PI);
+		//System.out.println("D³ugoœc wektora view: " + lengthViewVector);
+		//System.out.println("Alfa: " + alfa*180/Math.PI);
+		//System.out.println("Beta: " + beta*180/Math.PI);
 		
 		if (mouseButton == 1 && !isMapCreation) {
 			// lewy przycisk myszy

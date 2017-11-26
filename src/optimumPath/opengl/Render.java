@@ -104,6 +104,10 @@ public class Render implements GLEventListener {
 			drawOpen(gl);
 			isAnimation = true;
 		}
+		
+		if (renderMap.getAlgProcessor() != null)
+			if(renderMap.getAlgProcessor().isFinish())
+				renderMap.resultAlgorithm();
 
 		gl.glLoadIdentity();
 		gl.glTranslatef(0.0f, 0.0f, 0.0f);
@@ -289,19 +293,25 @@ public class Render implements GLEventListener {
 		if (renderMap.isStart()) {
 			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse1, 0);
 			Point3d translate = renderMap.getStartShift();
-			gl.glPushMatrix();
-			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
-			glut.glutSolidCube((float) renderMap.getSizeRaster());
-			gl.glPopMatrix();
+			Point3d raster = renderMap.pointFromShift(renderMap.getStartShift());
+			if (!(this.isMapCreation && (int) raster.getZ() > offsetLayer)) {
+				gl.glPushMatrix();
+				gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
+				glut.glutSolidCube((float) renderMap.getSizeRaster());
+				gl.glPopMatrix();
+			}
 		}
 
 		if (renderMap.isEnd()) {
 			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse2, 0);
 			Point3d translate = renderMap.getEndShift();
-			gl.glPushMatrix();
-			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
-			glut.glutSolidCube((float) renderMap.getSizeRaster());
-			gl.glPopMatrix();
+			Point3d raster = renderMap.pointFromShift(renderMap.getEndShift());
+			if (!(this.isMapCreation && (int) raster.getZ() > offsetLayer)) {
+				gl.glPushMatrix();
+				gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
+				glut.glutSolidCube((float) renderMap.getSizeRaster());
+				gl.glPopMatrix();
+			}
 		}
 
 	}

@@ -54,6 +54,10 @@ import java.awt.Component;
 import javax.swing.JCheckBox;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+import javax.swing.JRadioButtonMenuItem;
 
 
 public class WindowMain extends JFrame {
@@ -75,7 +79,7 @@ public class WindowMain extends JFrame {
 	private JComboBox cbAlgorithm, cbMetrics;
 	private ToolBarButton btnNewMap, btnSaveMap, btnLoadMap, btnExit;
 	private JMenuItem mntmExit, mntmLoadMap, mntmSaveMap, mntmNewMap;
-	private JMenuItem mntmDrawObstacle, mntmCheckStartPoint, mntmCheckStopPoint;
+	private JRadioButtonMenuItem mntmDrawObstacle, mntmDelObstacle, mntmCheckStartPoint, mntmCheckStopPoint;
 	
 	//Create a file chooser
 	final private JFileChooser fc;
@@ -85,14 +89,23 @@ public class WindowMain extends JFrame {
 	private ToolBarToggleButton btnStart;
 	private ToolBarToggleButton btnEnd;
 	private ToolBarButton btnHelp;
-	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JPanel panelSafe;
-	private JLabel label;
-	private JComboBox comboBox;
 	private ToolBarButton btnSaveScreen;
 	private ToolBarButton btnCopyLayer;
 	private ToolBarButton btnPasteLayer;
+	private JPanel panelSafe;
+	private JLabel label;
+	private JComboBox comboBox;
 	private JCheckBox cboxAnimation;
+	private final ButtonGroup bgToolbarMenu = new ButtonGroup();
+	private final ButtonGroup bgPopupMenu = new ButtonGroup();
+	private JSeparator separator_1;
+	private JMenuItem mntmCopyLayer;
+	private JMenuItem mntmPasteLayer;
+	private JMenuItem mntmSaveScreen;
+	private JSeparator separator_2;
+	private JMenu mnPomoc;
+	private JMenuItem mntmHelp;
+	private JMenuItem mntmAuthors;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -141,31 +154,68 @@ public class WindowMain extends JFrame {
 		menuBar.add(mnNewMenu);
 		
 		mntmNewMap = new JMenuItem("Nowa mapa");
+		mntmNewMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
 		mnNewMenu.add(mntmNewMap);
 		
 		mntmSaveMap = new JMenuItem("Zapisz mape");
+		mntmSaveMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
 		mnNewMenu.add(mntmSaveMap);
 		
 		mntmLoadMap = new JMenuItem("Wczytaj mape");
+		mntmLoadMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
 		mnNewMenu.add(mntmLoadMap);
 		
 		JSeparator separator = new JSeparator();
 		mnNewMenu.add(separator);
 		
+		mntmSaveScreen = new JMenuItem("Zapisz widok");
+		mnNewMenu.add(mntmSaveScreen);
+		
+		separator_2 = new JSeparator();
+		mnNewMenu.add(separator_2);
+		
 		mntmExit = new JMenuItem("Zamknij");
+		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
 		mnNewMenu.add(mntmExit);
 		
 		JMenu mnEdycja = new JMenu("Edycja");
 		menuBar.add(mnEdycja);
 		
-		mntmDrawObstacle = new JMenuItem("Rysuj przeszkod\u0119");
+		mntmDrawObstacle = new JRadioButtonMenuItem("Rysuj przeszkod\u0119");
+		bgPopupMenu.add(mntmDrawObstacle);
 		mnEdycja.add(mntmDrawObstacle);
 		
-		mntmCheckStartPoint = new JMenuItem("Zaznacz punkt startowy");
+		mntmDelObstacle = new JRadioButtonMenuItem("Usu\u0144 przeszkod\u0119");
+		bgPopupMenu.add(mntmDelObstacle);
+		mnEdycja.add(mntmDelObstacle);
+		
+		mntmCheckStartPoint = new JRadioButtonMenuItem("Zaznacz punkt startowy");
+		bgPopupMenu.add(mntmCheckStartPoint);
 		mnEdycja.add(mntmCheckStartPoint);
 		
-		mntmCheckStopPoint = new JMenuItem("Zaznacz punkt ko\u0144cowy");
+		mntmCheckStopPoint = new JRadioButtonMenuItem("Zaznacz punkt ko\u0144cowy");
+		bgPopupMenu.add(mntmCheckStopPoint);
 		mnEdycja.add(mntmCheckStopPoint);
+		
+		separator_1 = new JSeparator();
+		mnEdycja.add(separator_1);
+		
+		mntmCopyLayer = new JMenuItem("Kopiuj warstw\u0119");
+		mntmCopyLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+		mnEdycja.add(mntmCopyLayer);
+		
+		mntmPasteLayer = new JMenuItem("Wklej warstw\u0119");
+		mntmPasteLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
+		mnEdycja.add(mntmPasteLayer);
+		
+		mnPomoc = new JMenu("Pomoc");
+		menuBar.add(mnPomoc);
+		
+		mntmHelp = new JMenuItem("Pomoc");
+		mnPomoc.add(mntmHelp);
+		
+		mntmAuthors = new JMenuItem("Autorzy");
+		mnPomoc.add(mntmAuthors);
 		
 		JPanel contentPanel = new JPanel();
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -396,7 +446,6 @@ public class WindowMain extends JFrame {
 		btnSaveMap.setToolTipText("Zapisz mape");
 		btnLoadMap = new ToolBarButton();
 		btnLoadMap.setToolTipText("Wczytaj mape");
-		
 		btnCopyLayer = new ToolBarButton();
 		btnCopyLayer.setToolTipText("Kopiuj modyfikowan¹ warstwê");
 		btnPasteLayer = new ToolBarButton();
@@ -410,19 +459,20 @@ public class WindowMain extends JFrame {
 		btnExit.setToolTipText("Zamknij program");
 		
 		btnObst = new ToolBarToggleButton();
-		buttonGroup.add(btnObst);
+		bgToolbarMenu.add(btnObst);
 		btnObst.setToolTipText("Rysuj przeszkodê");
 		btnDelObst = new ToolBarToggleButton();
-		buttonGroup.add(btnDelObst);
+		bgToolbarMenu.add(btnDelObst);
 		btnDelObst.setToolTipText("Usuñ przeszkodê");
 		btnStart = new ToolBarToggleButton();
-		buttonGroup.add(btnStart);
+		bgToolbarMenu.add(btnStart);
 		btnStart.setToolTipText("Zaznacz punkt startowy");
 		btnEnd = new ToolBarToggleButton();
-		buttonGroup.add(btnEnd);
+		bgToolbarMenu.add(btnEnd);
 		btnEnd.setToolTipText("Zaznacz punkt koñcowy");
 		
-		buttonGroup.setSelected(btnObst.getModel(), true);
+		bgToolbarMenu.setSelected(btnObst.getModel(), true);
+		bgPopupMenu.setSelected(mntmDrawObstacle.getModel(), true);
 		
 		btnNewMap.setIcon(new ImageIcon("toolbar_icons/new.png"));
 		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/save.png"));
@@ -432,7 +482,6 @@ public class WindowMain extends JFrame {
 		btnDelObst.setIcon(new ImageIcon("toolbar_icons/delobst.png"));
 		btnStart.setIcon(new ImageIcon("toolbar_icons/start.png"));
 		btnEnd.setIcon(new ImageIcon("toolbar_icons/finish.png"));
-		
 		btnCopyLayer.setIcon(new ImageIcon("toolbar_icons/copy.png"));
 		btnPasteLayer.setIcon(new ImageIcon("toolbar_icons/paste.png"));
 		
@@ -449,10 +498,12 @@ public class WindowMain extends JFrame {
 		toolBar.add(btnStart);
 		toolBar.add(btnEnd);
 		toolBar.addSeparator();
-		toolBar.add(btnPasteLayer);
+		
 		toolBar.add(btnCopyLayer);
+		toolBar.add(btnPasteLayer);
 		toolBar.addSeparator();
 		toolBar.add(btnSaveScreen);
+		toolBar.addSeparator();
 		toolBar.add(btnHelp);
 		toolBar.add(btnExit);
 		
@@ -494,15 +545,29 @@ public class WindowMain extends JFrame {
 
 	
 	public int getSelectedToolbarButton() {
-		if (buttonGroup.isSelected(btnObst.getModel()))
+		if (bgToolbarMenu.isSelected(btnObst.getModel()))
 			return 0;
-		if (buttonGroup.isSelected(btnDelObst.getModel()))
+		if (bgToolbarMenu.isSelected(btnDelObst.getModel()))
 			return 1;
-		if (buttonGroup.isSelected(btnStart.getModel()))
+		if (bgToolbarMenu.isSelected(btnStart.getModel()))
 			return 2;
-		if (buttonGroup.isSelected(btnEnd.getModel()))
+		if (bgToolbarMenu.isSelected(btnEnd.getModel()))
 			return 3;
 		return -1;
+	}
+	
+	private void bindGroupPopup() {
+		mntmDrawObstacle.setSelected(btnObst.isSelected());
+		mntmDelObstacle.setSelected(btnDelObst.isSelected());
+		mntmCheckStartPoint.setSelected(btnStart.isSelected());
+		mntmCheckStopPoint.setSelected(btnEnd.isSelected());
+	}
+	
+	private void bindGroupToolbar() {
+		btnObst.setSelected(mntmDrawObstacle.isSelected());
+		btnDelObst.setSelected(mntmDelObstacle.isSelected());
+		btnStart.setSelected(mntmCheckStartPoint.isSelected());
+		btnEnd.setSelected(mntmCheckStopPoint.isSelected());
 	}
 	
 	///////////////////////////////////////////////////////////////////
@@ -530,6 +595,7 @@ public class WindowMain extends JFrame {
 				
 				render.getRenderMap().setSize(sizeX, sizeY, sizeZ);
 				render.getRenderMap().initMap();
+				render.getEditionMap().clearClipboard();
 				setCameraToCenter(0);
 				initLayerSpinner();
 			}
@@ -574,6 +640,7 @@ public class WindowMain extends JFrame {
 			        render.getRenderMap().intMapToRasterMap(outputMap, sizeX, sizeY, sizeZ);
 			        setCameraToCenter(0);
 					initLayerSpinner();
+					render.getEditionMap().clearClipboard();
 			    } else {
 			    	System.out.println("Open command cancelled by user.");
 			    }
@@ -602,17 +669,31 @@ public class WindowMain extends JFrame {
 			}
 		});
 		
+		btnCopyLayer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (!render.isMapCreation())
+					return;
+				
+				int layer = ((Integer)spnLayer.getValue()).intValue();
+				render.getEditionMap().copyLayer(render.getRenderMap(), layer);
+			}
+		});
+		
+		btnPasteLayer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (!render.isMapCreation())
+					return;
+				
+				int layer = ((Integer)spnLayer.getValue()).intValue();
+				render.getEditionMap().pasteLayer(render.getRenderMap(), layer);
+			}
+		});
+		
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
-		
-		
-		mntmNewMap.addActionListener(btnNewMap.getActionListeners()[0]);
-		mntmSaveMap.addActionListener(btnSaveMap.getActionListeners()[0]);
-		mntmLoadMap.addActionListener(btnLoadMap.getActionListeners()[0]);
-		mntmExit.addActionListener(btnExit.getActionListeners()[0]);
 		
 		rdbtnPreview.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -638,19 +719,9 @@ public class WindowMain extends JFrame {
 			public void stateChanged(ChangeEvent arg0) {
 				System.out.println("Zmieniono warstwe!");
 				setOffsetMap();
+				GLpanel.requestFocus();
 			}
 		});
-		
-		btnObst.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				render.getEditionMap().setSelectedOption(getSelectedToolbarButton());
-			}
-		});
-		
-		btnDelObst.addActionListener(btnObst.getActionListeners()[0]);
-		btnStart.addActionListener(btnObst.getActionListeners()[0]);
-		btnEnd.addActionListener(btnObst.getActionListeners()[0]);
-		
 		
 		btnApply.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -670,6 +741,39 @@ public class WindowMain extends JFrame {
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 			}
 		});
+		
+		mntmNewMap.addActionListener(btnNewMap.getActionListeners()[0]);
+		mntmSaveMap.addActionListener(btnSaveMap.getActionListeners()[0]);
+		mntmLoadMap.addActionListener(btnLoadMap.getActionListeners()[0]);
+		mntmSaveScreen.addActionListener(btnSaveScreen.getActionListeners()[0]);
+		mntmExit.addActionListener(btnExit.getActionListeners()[0]);
+		
+		mntmCopyLayer.addActionListener(btnCopyLayer.getActionListeners()[0]);
+		mntmPasteLayer.addActionListener(btnPasteLayer.getActionListeners()[0]);
+
+		ActionListener GroupPopupListener = new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				bindGroupToolbar();
+				render.getEditionMap().setSelectedOption(getSelectedToolbarButton());
+			}
+		};
+		
+		ActionListener GroupToolbarListener = new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				bindGroupPopup();
+				render.getEditionMap().setSelectedOption(getSelectedToolbarButton());
+			}
+		};
+		
+		mntmDrawObstacle.addActionListener(GroupPopupListener);
+		mntmDelObstacle.addActionListener(GroupPopupListener);
+		mntmCheckStartPoint.addActionListener(GroupPopupListener);
+		mntmCheckStopPoint.addActionListener(GroupPopupListener);
+	
+		btnObst.addActionListener(GroupToolbarListener);
+		btnDelObst.addActionListener(GroupToolbarListener);
+		btnStart.addActionListener(GroupToolbarListener);
+		btnEnd.addActionListener(GroupToolbarListener);
 	}
 
 	public JPanel getGLpanel() {

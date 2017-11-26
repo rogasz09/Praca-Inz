@@ -22,7 +22,7 @@ public class Map {
 	private Point3d startShift;
 	private Point3d endShift;
 	
-	//private AStar algorithmAStar;
+	private AStarPerform algProcessor;
 	
 	private boolean isStart, isEnd;
 	private boolean isAnimation;
@@ -32,21 +32,24 @@ public class Map {
 	////////////////////////////////////
 	// sleep
 	public class AStarPerform implements Runnable {
-		AStar algorithmAStar;
-		boolean isChebyshev;
+		private volatile AStar algorithmAStar;
+		private boolean isChebyshev;
+		private volatile boolean isFinish = false;
 		
 		public AStarPerform(AStar algorithmAStar, boolean isChebyshev) {
 		    this.algorithmAStar = algorithmAStar;
 		    this.isChebyshev = isChebyshev;
 		}
+		
+		@Override
 		public void run() {
 			algorithmAStar.perform(isChebyshev);
 			algorithmAStar.writePathToMap(rasterMap);
-			
-			makeShiftList();
-			openShift.clear();
-			closedShift.clear();
-			isAnimation = false;
+			isFinish = true;
+		}
+
+		public boolean isFinish() {
+			return isFinish;
 		}
 	}
 	
@@ -230,10 +233,6 @@ public class Map {
 		
 	}
 	
-	public void printPlus() {
-		System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-	}
-	
 	public void makeShift(int x, int y, int z) {
 		double shiftX = (double)x * sizeRaster;
 		double shiftY = (double)z * sizeRaster;
@@ -284,16 +283,50 @@ public class Map {
 		return false;
 	}
 	
+	public void resetRaster(int x, int y, int z) {
+		Raster type = rasterMap[z][y][x];
+		rasterMap[z][y][x] = Raster.EMPTY;
+		switch(type) {
+			case OBSTACLE:
+				removeFromlist(obstacleShift, x, y, z);
+				break;
+			case PATH:
+				removeFromlist(pathShift, x, y, z);
+				break;
+			case START:
+				isStart = false;
+				break;
+			case END:
+				isEnd = false;
+				break;
+			default:
+				break;
+		}
+		
+	}
+	
 	
 	/////////////////////////////////////////
 	// WYKONANIE ALGORYTMOW
 	
 	public void performAStar(boolean isChebyshev) {
+		if(algProcessor != null)
+			return;
+		
 		AStar algorithmAStar = new AStar(this, sizeZ, sizeY, sizeX);
 		
-		new Thread(new AStarPerform(algorithmAStar, isChebyshev)).start();
-		//algorithmAStar.perform();
+		algProcessor = new AStarPerform(algorithmAStar, isChebyshev);
+		Thread algThread = new Thread(algProcessor);
+		algThread.start();
 		
+	}
+	
+	public void resultAlgorithm() {
+		makeShiftList();
+		openShift.clear();
+		closedShift.clear();
+		isAnimation = false;
+		algProcessor = null;
 	}
 	
 	public void resetPath() {
@@ -311,6 +344,11 @@ public class Map {
 	public void setRaster(int x, int y, int z, Raster type) {
 		if (type == rasterMap[z][y][x])
 			return;
+		if (type == Raster.EMPTY) {
+			resetRaster(x, y, z);
+			return;
+		}
+		
 		if (type == Raster.START) {
 			Point3d raster = this.pointFromShift(startShift);
 			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
@@ -475,6 +513,14 @@ public class Map {
 
 	public void setSpeedAnimation(int speedAnimation) {
 		this.speedAnimation = speedAnimation;
+	}
+
+	public AStarPerform getAlgProcessor() {
+		return algProcessor;
+	}
+
+	public void setAlgProcessor(AStarPerform algProcessor) {
+		this.algProcessor = algProcessor;
 	}
 	
 	

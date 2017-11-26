@@ -149,7 +149,6 @@ public class AStar {
 			return true;
 		}
 		if (direction == 2) {
-			ArrayList<Node> tmp = new ArrayList<Node>();
 			if (actualNode.getX() == neighbour.getX()) {
 				for (int i = 0; i < shared.size(); i++) {
 					int x = shared.get(i).getX();
@@ -219,8 +218,8 @@ public class AStar {
 		startNode.setGHF(g, h, f);
 		startNode.setParent(startNode);
 
-		printNode(startNode);
-		printNode(endNode);
+		//printNode(startNode);
+		//printNode(endNode);
 		openset.add(startNode);
 		// openset.addAll(this.getNeighboursManhattan(startNode));
 		// int x;
@@ -243,7 +242,7 @@ public class AStar {
 				neighbours = getNeighboursManhattan(actualNode);
 			}
 			
-			printList(neighbours);
+			//printList(neighbours);
 			closedset.add(actualNode);
 			openset.remove(x);
 
@@ -304,8 +303,8 @@ public class AStar {
 		path.add(currentNode);
 
 		while (!isSameNode(currentNode, currentNode.getParent())) {
-			printNode(currentNode);
-			printNode(currentNode.getParent());
+			//printNode(currentNode);
+			//printNode(currentNode.getParent());
 			currentNode = currentNode.getParent();
 			path.add(currentNode);
 		}
@@ -349,6 +348,7 @@ public class AStar {
 				index = i;
 			}
 		}
+		//System.out.println(lowestFCost);
 		return index;
 	}
 

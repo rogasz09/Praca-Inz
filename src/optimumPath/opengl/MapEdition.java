@@ -16,10 +16,12 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 	private Point3d nearv, farv;
 	private int sx, sy;
 	private int selectedOption;
-	private boolean isClicked, isDragged;
     private int mouseButton;
-
-	
+    
+    private Raster clipboardLayer[][];
+    private int clipSizeX, clipSizeY;
+    
+    private boolean isClicked, isDragged;
 	
 	//////////////////////////////
 	// konstruktory
@@ -28,6 +30,9 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 	public MapEdition() {
 		nearv = new Point3d();
 		farv = new Point3d();
+		
+		clipSizeX = 0;
+		clipSizeY = 0;
 	}
 	
 	//////////////////////////////////
@@ -101,12 +106,12 @@ public class MapEdition implements MouseListener, MouseMotionListener{
         // so here are the desired (x, y) coordinates
         double x = nearv.getX() + (farv.getX() - nearv.getX()) * t;
         double z = nearv.getZ() + (farv.getZ() - nearv.getZ()) * t;
-        System.out.println("World coords (" + x + ", " + 0.0 + ", " + z + ")");
+        //System.out.println("World coords (" + x + ", " + 0.0 + ", " + z + ")");
         
         x = Math.floor((x + halfSizeRaster)/sizeRaster);
         y = Math.floor((y + halfSizeRaster)/sizeRaster - 1);
         z = Math.floor((z + halfSizeRaster)/sizeRaster);
-        System.out.println("Map coords (" + x + ", " + 0.0 + ", " + z + ")");
+        //System.out.println("Map coords (" + x + ", " + 0.0 + ", " + z + ")");
         
         return new Point3d(x, z, y);
 	}
@@ -159,6 +164,43 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 		}
 		
 		isClicked = false;
+	}
+	
+	//kopiowanie akualnie modyfikowanej wartwy do schowka;
+	public void copyLayer(Map renderMap, int layer) {
+		clipSizeX = renderMap.getSizeX();
+		clipSizeY = renderMap.getSizeY();
+		
+		clipboardLayer = new Raster[clipSizeY][clipSizeX];
+		//zachowanie aktualnej warstwy do tablicy
+		for (int y = 0; y < clipSizeY; y++) {
+			for (int x = 0; x < clipSizeX; x++) {
+				if (renderMap.getRasterMap()[layer][y][x] == Raster.OBSTACLE)
+					clipboardLayer[y][x] =  Raster.OBSTACLE;
+				else
+					clipboardLayer[y][x] =  Raster.EMPTY;
+			}
+		}
+	}
+	
+	//wklejanie aktualnie modyfikowanehj warstwy ze schowka
+	public void pasteLayer(Map renderMap, int layer) {
+		if (clipboardLayer == null)
+			return;
+		
+		//wczytanie aktualnie zapisanej warstwy do tablicy
+		for (int y = 0; y < clipSizeY; y++) {
+			for (int x = 0; x < clipSizeX; x++) {
+				renderMap.setRaster(x, y, layer, clipboardLayer[y][x]);
+			}
+		}
+	}
+	
+	//czysczenie schowka
+	public void clearClipboard() {
+		clipboardLayer = null;
+		clipSizeX = 0;
+		clipSizeY = 0;
 	}
 	
 	///////////////////////////////////////////
