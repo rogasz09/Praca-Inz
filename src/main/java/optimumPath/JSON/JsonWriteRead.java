@@ -3,18 +3,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
-import org.json.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import optimumPath.common.*;
 
 public class JsonWriteRead {
 

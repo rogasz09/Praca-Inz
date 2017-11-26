@@ -15,12 +15,12 @@ public class Node {
 	private Node parent;
 	Raster type;
 	
-	Node(int z, int y, int x){
+	public Node(int z, int y, int x){
 		this(z, y, x, Raster.EMPTY);
 		
 	}
 	
-	Node(int z, int y, int x, Raster type){
+	public Node(int z, int y, int x, Raster type){
 		setZ(z);
 		setY(y);
 		setX(x);
