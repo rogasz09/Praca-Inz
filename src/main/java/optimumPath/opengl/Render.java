@@ -69,9 +69,10 @@ public class Render implements GLEventListener {
 		glcanvas.addMouseListener(editionMap);
 		glcanvas.addMouseMotionListener(editionMap);
 		glcanvas.setSize(100, 100);
-
-		final FPSAnimator animator = new FPSAnimator(glcanvas, 300, true);
-
+		
+		final FPSAnimator animator = new FPSAnimator(glcanvas, 60, true);
+		renderMap.setAnimator(animator);
+		
 		animator.start();
 	}
 
@@ -87,7 +88,7 @@ public class Render implements GLEventListener {
 			editionMap.modifcationMap(renderMap, offsetLayer);
 		}
 
-		drawBase(gl, 0, 1.0f);
+		drawBase(gl);
 		if (isMapCreation)
 			drawGrid(gl, offsetLayer + 1);
 		else
@@ -98,19 +99,17 @@ public class Render implements GLEventListener {
 		drawPath(gl);
 		
 		if (renderMap.isAnimation()) {
-			isAnimation = false;
 			drawActual(gl);
 			drawClosed(gl);
 			drawOpen(gl);
-			isAnimation = true;
 		}
 		
 		if (renderMap.getAlgProcessor() != null)
 			if(renderMap.getAlgProcessor().isFinish())
 				renderMap.resultAlgorithm();
 
+		//gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
-		gl.glTranslatef(0.0f, 0.0f, 0.0f);
 
 		glu.gluLookAt(camera.getPointPos().getX(), camera.getPointPos().getY(), camera.getPointPos().getZ(),
 				camera.getPointCenter().getX(), camera.getPointCenter().getY(), camera.getPointCenter().getZ(),
@@ -186,24 +185,23 @@ public class Render implements GLEventListener {
 
 	///////////////////////////////////////////////////
 	// rysowanie podstawy
-	public void drawBase(GL2 gl, int layer, float transparency) {
+	public void drawBase(GL2 gl) {
 
-		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, transparency };
+		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, 1.0f };
 		float halfSizeRaster = (float) renderMap.getSizeRaster() / 2;
-		float offset = (float) layer * (float) renderMap.getSizeRaster();
 
 		gl.glPushMatrix();
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 		gl.glBegin(GL2.GL_QUADS);
 
-		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster + offset, -halfSizeRaster);
-		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster + offset,
+		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster, -halfSizeRaster);
+		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster,
 				(float) renderMap.getSizeRaster() * (float) renderMap.getSizeY() - halfSizeRaster);
 		gl.glVertex3f((float) renderMap.getSizeRaster() * (float) renderMap.getSizeX() - halfSizeRaster,
-				-halfSizeRaster + offset,
+				-halfSizeRaster,
 				(float) renderMap.getSizeRaster() * (float) renderMap.getSizeY() - halfSizeRaster);
 		gl.glVertex3f((float) renderMap.getSizeRaster() * (float) renderMap.getSizeX() - halfSizeRaster,
-				-halfSizeRaster + offset, -halfSizeRaster);
+				-halfSizeRaster, -halfSizeRaster);
 
 		gl.glEnd();
 		gl.glPopMatrix();
@@ -252,7 +250,7 @@ public class Render implements GLEventListener {
 
 		float no_mat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
-		float mat_diffuse[] = { 0.1f, 0.5f, 0.8f, 0.8f }; // kolor, ostatni parametr okresla przezroczystosc
+		float mat_diffuse[] = { 0.1f, 0.5f, 0.8f, 0.85f }; // kolor, ostatni parametr okresla przezroczystosc
 		float mat_diffuse_modification[] = { 0.5f, 0.1f, 0.8f, 0.5f }; // kolor, ostatni parametr okresla
 																		// przezroczystosc
 		float mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -343,7 +341,7 @@ public class Render implements GLEventListener {
 	public void drawClosed(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.2f, 0.2f, 0.2f, 0.4f }; // kolor, ostatni parametr okresla przezroczystosc
+		float mat_diffuse[] = { 0.1f, 0.1f, 0.1f, 0.5f }; // kolor, ostatni parametr okresla przezroczystosc
 
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 
@@ -363,7 +361,7 @@ public class Render implements GLEventListener {
 	public void drawOpen(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.4f }; // kolor, ostatni parametr okresla przezroczystosc
+		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.3f }; // kolor, ostatni parametr okresla przezroczystosc
 
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 
@@ -378,8 +376,8 @@ public class Render implements GLEventListener {
 		}
 	}
 
-	////////////////////////
-	// rysowanie otwarte
+	/////////////////////////////////////////////
+	// rysowanie aktualn¹ przetwarzany raster
 	public void drawActual(GL2 gl) {
 		GLUT glut = new GLUT();
 

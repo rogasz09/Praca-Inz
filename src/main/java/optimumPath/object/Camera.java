@@ -13,7 +13,7 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     
     private Point3d pointPos, pointCenter, vectorUp; // punkt Pos, punkt Center, vektor Up
     private Point3d viewVector;
-    //private double cameraSpeed = 0.1; // szybkosc kamery
+    private int zoomSpeed = 25; // szybkosc oddalnia kamery
     
     private Point3d prevPointPos, prevPointCenter, prevVectorUp; // poprzednie ustawienia kamery (przed modyfikacja mapy)
     private int prevMouseX, prevMouseY;
@@ -59,15 +59,14 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     //////////////////////////////////////
     
     // oblicza wektor view oraz jego dlugosc
-    public void calculateViewVector() {
+    private void calculateViewVector() {
     	viewVector.setPoint(pointCenter); 
     	viewVector.subPoint(pointPos);
     	lengthViewVector = lengthVector(pointCenter, pointPos);
-    	//System.out.println(lengthViewVector);
     }
     
     // oblicza wartosci alfa beta
-    public void calculateAlfaBeta() {
+    private void calculateAlfaBeta() {
     	Point3d mPos = new Point3d(pointPos.getX(), 0, pointPos.getZ());
     	Point3d mCent = new Point3d(pointCenter.getX(), 0, pointCenter.getZ());
     	double R = lengthVector(mCent, mPos);
@@ -79,7 +78,7 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     }
     
     // liczenie dlugosci wektora
-    public double lengthVector(Point3d point1, Point3d point2) {
+    private double lengthVector(Point3d point1, Point3d point2) {
     	double x = point1.getX() - point2.getX();
     	double y = point1.getY() - point2.getY();
     	double z = point1.getZ() - point2.getZ();
@@ -130,6 +129,48 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     	return true;
     }
     
+    //ustawia kamerê w widocznym miejscu mapy podczas stworzenia nowej
+    public void setInitialCamera(Map renderMap) {
+    	double sizeRaster = renderMap.getSizeRaster();
+		
+		double lengthX = renderMap.getSizeX()*sizeRaster;
+		double lengthY = renderMap.getSizeY()*sizeRaster;
+		double lengthZ = renderMap.getSizeZ()*sizeRaster;
+		
+		double pCenterX = (lengthX - sizeRaster)/2;
+		double pCenterY = (lengthZ - sizeRaster)/2;
+		double pCenterZ = (lengthY - sizeRaster)/2;
+		
+		double pPosZ = lengthY*2.1 - sizeRaster;
+		setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
+		setPointPos(new Point3d(pCenterX+0.05, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
+    }
+    
+    //ustawienie kamery w œrodku modyfikowanej warstwy obejmuj¹c¹ ca³¹ warstwe
+    public void setCameraCenterLayer(Map renderMap, int layer, int width, int height) {
+    	double sizeRaster = renderMap.getSizeRaster();
+		
+		double lengthX = renderMap.getSizeX()*sizeRaster;
+		double lengthY = renderMap.getSizeY()*sizeRaster;
+		
+		double centerX = (lengthX - sizeRaster)/2;
+		double centerZ = (lengthY - sizeRaster)/2;
+		double pointFarY, maxSize;
+		
+		if (lengthY >= lengthX) {
+			maxSize = lengthY;
+		} else {
+			double ratio =  (double)height/(double)width;
+			maxSize = lengthX*ratio;
+		}
+		
+		double offsetY = (double)layer*sizeRaster;
+		double offsetZ = 0.02*offsetY;
+		pointFarY = (maxSize/2)/Math.tan(Math.toRadians(45.0/2)) + sizeRaster/2 + offsetY;
+		setPointCenter(new Point3d(centerX, 5.0, centerZ));
+		setPointPos(new Point3d(centerX, pointFarY, centerZ+0.02+offsetZ ));
+    }
+    
     ///////////////////////////////////////////
     // Obs³uga kamery
     ///////////////////////////////////////////
@@ -162,9 +203,6 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     	pointPos.setX(pointCenter.getX() + lengthViewVector*Math.abs(Math.cos(beta))*Math.cos(alfa));
     	pointPos.setZ(pointCenter.getZ() + lengthViewVector*Math.abs(Math.cos(beta))*Math.sin(alfa));
     	pointPos.setY(pointCenter.getY() + lengthViewVector*Math.sin(beta));
-    	//pointCenter.setZ(pointPos.getZ() + Math.sin(-angleY)*viewVector.getX() + Math.cos(-angleY)*viewVector.getZ());
-    	//pointCenter.setX(pointPos.getX() + Math.cos(-angleY)*viewVector.getX() - Math.sin(-angleY)*viewVector.getZ());
-    	//pointCenter.setY(pointCenter.getY() + angleZ * 2);
     }
     
     // przyblizenie i oddalenie kamery
@@ -267,6 +305,14 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 	public void setMouse(MouseEvent mouse) {
 		this.mouse = mouse;
 	}
+	
+	public int getZoomSpeed() {
+		return zoomSpeed;
+	}
+
+	public void setZoomSpeed(int zoomSpeed) {
+		this.zoomSpeed = zoomSpeed;
+	}
     
     /////////////////////////////////////////
 	
@@ -275,7 +321,6 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
     //////////////////////////////////////
 	// Obs³uga myszy 
     //////////////////////////////////////
-	
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -325,9 +370,9 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		Dimension size = e.getComponent().getSize();
         if (e.getWheelRotation() < 0)
-        	zoomView(25, size);
+        	zoomView(zoomSpeed, size);
         else
-        	zoomView(-25, size);
+        	zoomView(-zoomSpeed, size);
 	}
 	
  //////////////////////////////////////////////

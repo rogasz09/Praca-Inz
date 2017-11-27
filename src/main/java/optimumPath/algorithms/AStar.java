@@ -18,15 +18,15 @@ public class AStar {
 
 	private ArrayList<Node> path;
 
-	public AStar(Map inputMap, int inputSizeZ, int inputSizeY, int inputSizeX) {
-		initMap(inputMap, inputSizeZ, inputSizeY, inputSizeX);
+	public AStar(Map inputMap) {
+		initMap(inputMap);
 	}
 
-	public void initMap(Map inputMap, int inputSizeZ, int inputSizeY, int inputSizeX) {
+	public void initMap(Map inputMap) {
 		this.renderMap = inputMap;
-		this.sizeZ = inputSizeZ;
-		this.sizeY = inputSizeY;
-		this.sizeX = inputSizeX;
+		this.sizeZ = inputMap.getSizeZ();
+		this.sizeY = inputMap.getSizeY();
+		this.sizeX = inputMap.getSizeX();
 		this.map = new Raster[sizeZ][sizeY][sizeX];
 
 		// I madethis initialization, in case to avoid problems with no start or end

@@ -19,13 +19,13 @@ public class RunOptimumPathTest {
 	@Test
 	public void test() {
 		
-		AStar start = new AStar(new Map(), 1, 10, 10);
+		AStar start = new AStar(new Map());
 		assertTrue(start.getSizeX() == 10);;
 	}
 	
 	@Test
 	public void testAStar() {
-		Map testMap = new Map(10,10,10, 1.0);
+		Map testMap = new Map(10, 10, 10, 1.0);
 		testMap.setRaster(0, 1, 2, Raster.OBSTACLE);
 //		testMap.setRaster(2, 0, 0, Raster.OBSTACLE);
 //		testMap.setRaster(0, 2, 0, Raster.OBSTACLE);
@@ -35,7 +35,7 @@ public class RunOptimumPathTest {
 //		testMap.setRaster(0, 2, 2, Raster.OBSTACLE);
 //		testMap.setRaster(2, 2, 2, Raster.OBSTACLE);
 		
-		AStar start = new AStar(testMap, 10, 10, 10);
+		AStar start = new AStar(testMap);
 		Method method;
 		try {
 			method = start.getClass().getDeclaredMethod("checkPossibleTransition", Node.class, Node.class);

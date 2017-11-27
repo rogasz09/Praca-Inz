@@ -103,9 +103,16 @@ public class WindowMain extends JFrame {
 	private JMenuItem mntmPasteLayer;
 	private JMenuItem mntmSaveScreen;
 	private JSeparator separator_2;
-	private JMenu mnPomoc;
+	private JMenu mnHelp;
 	private JMenuItem mntmHelp;
 	private JMenuItem mntmAuthors;
+	private JSeparator separator_3;
+	private JMenuItem mntmClearLayer;
+	private JMenuItem mntmClearMap;
+	private JMenu mnNarzdzia;
+	private JMenuItem mntmOpcjeMapy;
+	private JMenuItem mntmUstawieniaKolorw;
+	private JSeparator separator_4;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -114,15 +121,15 @@ public class WindowMain extends JFrame {
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
 		setResizable(false);
-		setBounds(100, 100, 922, 767);
+		setBounds(100, 100, 1041, 774);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		this.render = render;
 		this.json = new JsonWriteRead();
 		this.fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "JSON", "json");
-		fc.setFileFilter(filter);
-		setCameraToCenter(0);
+		this.fc.setFileFilter(filter);
+		this.render.getCamera().setInitialCamera(this.render.getRenderMap());;
 		
 		initComponents();
 		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
@@ -150,72 +157,94 @@ public class WindowMain extends JFrame {
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
-		JMenu mnNewMenu = new JMenu("Pliki");
-		menuBar.add(mnNewMenu);
+		JMenu mnFiles = new JMenu("Pliki");
+		menuBar.add(mnFiles);
 		
 		mntmNewMap = new JMenuItem("Nowa mapa");
 		mntmNewMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
-		mnNewMenu.add(mntmNewMap);
+		mnFiles.add(mntmNewMap);
 		
 		mntmSaveMap = new JMenuItem("Zapisz mape");
 		mntmSaveMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
-		mnNewMenu.add(mntmSaveMap);
+		mnFiles.add(mntmSaveMap);
 		
 		mntmLoadMap = new JMenuItem("Wczytaj mape");
 		mntmLoadMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
-		mnNewMenu.add(mntmLoadMap);
-		
-		JSeparator separator = new JSeparator();
-		mnNewMenu.add(separator);
-		
-		mntmSaveScreen = new JMenuItem("Zapisz widok");
-		mnNewMenu.add(mntmSaveScreen);
+		mnFiles.add(mntmLoadMap);
 		
 		separator_2 = new JSeparator();
-		mnNewMenu.add(separator_2);
+		mnFiles.add(separator_2);
 		
 		mntmExit = new JMenuItem("Zamknij");
 		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
-		mnNewMenu.add(mntmExit);
+		mnFiles.add(mntmExit);
 		
-		JMenu mnEdycja = new JMenu("Edycja");
-		menuBar.add(mnEdycja);
+		JMenu mnEdition = new JMenu("Edycja");
+		menuBar.add(mnEdition);
 		
 		mntmDrawObstacle = new JRadioButtonMenuItem("Rysuj przeszkod\u0119");
 		bgPopupMenu.add(mntmDrawObstacle);
-		mnEdycja.add(mntmDrawObstacle);
+		mnEdition.add(mntmDrawObstacle);
 		
 		mntmDelObstacle = new JRadioButtonMenuItem("Usu\u0144 przeszkod\u0119");
 		bgPopupMenu.add(mntmDelObstacle);
-		mnEdycja.add(mntmDelObstacle);
+		mnEdition.add(mntmDelObstacle);
 		
 		mntmCheckStartPoint = new JRadioButtonMenuItem("Zaznacz punkt startowy");
 		bgPopupMenu.add(mntmCheckStartPoint);
-		mnEdycja.add(mntmCheckStartPoint);
+		mnEdition.add(mntmCheckStartPoint);
 		
 		mntmCheckStopPoint = new JRadioButtonMenuItem("Zaznacz punkt ko\u0144cowy");
 		bgPopupMenu.add(mntmCheckStopPoint);
-		mnEdycja.add(mntmCheckStopPoint);
+		mnEdition.add(mntmCheckStopPoint);
 		
 		separator_1 = new JSeparator();
-		mnEdycja.add(separator_1);
+		mnEdition.add(separator_1);
 		
 		mntmCopyLayer = new JMenuItem("Kopiuj warstw\u0119");
 		mntmCopyLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
-		mnEdycja.add(mntmCopyLayer);
+		mnEdition.add(mntmCopyLayer);
 		
 		mntmPasteLayer = new JMenuItem("Wklej warstw\u0119");
 		mntmPasteLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
-		mnEdycja.add(mntmPasteLayer);
+		mnEdition.add(mntmPasteLayer);
 		
-		mnPomoc = new JMenu("Pomoc");
-		menuBar.add(mnPomoc);
+		separator_3 = new JSeparator();
+		mnEdition.add(separator_3);
+		
+		mntmClearLayer = new JMenuItem("Wyczy\u015B\u0107 warstw\u0119");
+		mntmClearLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_MASK));
+		mnEdition.add(mntmClearLayer);
+		
+		mntmClearMap = new JMenuItem("Wyczy\u015B\u0107 map\u0119");
+		mnEdition.add(mntmClearMap);
+		
+		mnNarzdzia = new JMenu("Narz\u0119dzia");
+		menuBar.add(mnNarzdzia);
+		
+		separator_4 = new JSeparator();
+		mnNarzdzia.add(separator_4);
+		
+		mntmSaveScreen = new JMenuItem("Zapisz widok");
+		mnNarzdzia.add(mntmSaveScreen);
+		
+		JSeparator separator = new JSeparator();
+		mnNarzdzia.add(separator);
+		
+		mntmOpcjeMapy = new JMenuItem("Ustawienia mapy");
+		mnNarzdzia.add(mntmOpcjeMapy);
+		
+		mntmUstawieniaKolorw = new JMenuItem("Ustawienia kolor\u00F3w");
+		mnNarzdzia.add(mntmUstawieniaKolorw);
+		
+		mnHelp = new JMenu("Pomoc");
+		menuBar.add(mnHelp);
 		
 		mntmHelp = new JMenuItem("Pomoc");
-		mnPomoc.add(mntmHelp);
+		mnHelp.add(mntmHelp);
 		
 		mntmAuthors = new JMenuItem("Autorzy");
-		mnPomoc.add(mntmAuthors);
+		mnHelp.add(mntmAuthors);
 		
 		JPanel contentPanel = new JPanel();
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -521,29 +550,6 @@ public class WindowMain extends JFrame {
 	}
 	
 	
-	public void setCameraToCenter(int side) {
-		double sizeRaster = render.getRenderMap().getSizeRaster();
-		
-		double lengthX = render.getRenderMap().getSizeX()*sizeRaster;
-		double lengthY = render.getRenderMap().getSizeY()*sizeRaster;
-		double lengthZ = render.getRenderMap().getSizeZ()*sizeRaster;
-		
-		double pCenterX = (lengthX - sizeRaster)/2;
-		double pCenterY = (lengthZ - sizeRaster)/2;
-		double pCenterZ = (lengthY - sizeRaster)/2;
-		
-		//usatawienie kamery w œrodku mapy
-		if (side == 0) {
-			double pPosZ = lengthY*2.5 - sizeRaster;
-			render.getCamera().setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
-			render.getCamera().setPointPos(new Point3d(pCenterX, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
-		} else {
-			render.getCamera().setPointCenter(new Point3d(pCenterX, 0.0, pCenterZ));
-			render.getCamera().setPointPos(new Point3d(pCenterX, (lengthZ - sizeRaster) + 2.6*sizeRaster, pCenterZ+0.02 ));
-		}
-	}
-
-	
 	public int getSelectedToolbarButton() {
 		if (bgToolbarMenu.isSelected(btnObst.getModel()))
 			return 0;
@@ -573,7 +579,7 @@ public class WindowMain extends JFrame {
 	///////////////////////////////////////////////////////////////////
 	// Metoda zawieraj¹ca kod tworz¹cy event'y komponetów
 	///////////////////////////////////////////////////////////////////
-	
+
 	private void createEvents() {
 		btnNewMap.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -596,8 +602,12 @@ public class WindowMain extends JFrame {
 				render.getRenderMap().setSize(sizeX, sizeY, sizeZ);
 				render.getRenderMap().initMap();
 				render.getEditionMap().clearClipboard();
-				setCameraToCenter(0);
+				
+				rdbtnPreview.doClick();
 				initLayerSpinner();
+				setOffsetMap();
+				render.getCamera().setInitialCamera(render.getRenderMap());
+				
 			}
 		});
 		
@@ -638,9 +648,11 @@ public class WindowMain extends JFrame {
 			        int sizeZ = json.getSizeZfromJSON();
 			        json.printMap(outputMap, sizeZ, sizeY, sizeX);
 			        render.getRenderMap().intMapToRasterMap(outputMap, sizeX, sizeY, sizeZ);
-			        setCameraToCenter(0);
 					initLayerSpinner();
+					setOffsetMap();
 					render.getEditionMap().clearClipboard();
+					rdbtnPreview.doClick();
+					render.getCamera().setInitialCamera(render.getRenderMap());
 			    } else {
 			    	System.out.println("Open command cancelled by user.");
 			    }
@@ -711,7 +723,11 @@ public class WindowMain extends JFrame {
 				render.getRenderMap().resetPath();
 				if (!render.getCamera().isPrevCamera())
 					render.getCamera().saveActualCamera();
-				setCameraToCenter(1);
+				
+				int layer = ((Integer)spnLayer.getValue()).intValue();
+				int width = render.getGlcanvas().getWidth();
+				int height = render.getGlcanvas().getHeight();
+				render.getCamera().setCameraCenterLayer(render.getRenderMap(), layer, width, height);
 			}
 		});
 		
@@ -719,6 +735,11 @@ public class WindowMain extends JFrame {
 			public void stateChanged(ChangeEvent arg0) {
 				System.out.println("Zmieniono warstwe!");
 				setOffsetMap();
+				
+				int layer = ((Integer)spnLayer.getValue()).intValue();
+				int width = render.getGlcanvas().getWidth();
+				int height = render.getGlcanvas().getHeight();
+				render.getCamera().setCameraCenterLayer(render.getRenderMap(), layer, width, height);
 				GLpanel.requestFocus();
 			}
 		});
@@ -739,6 +760,65 @@ public class WindowMain extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
+			}
+		});
+		
+		mntmClearLayer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (!render.isMapCreation())
+					return;
+				
+				int layer = ((Integer)spnLayer.getValue()).intValue();
+				render.getEditionMap().clearLayer(render.getRenderMap(), layer);
+			}
+		});
+		
+		mntmClearMap.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				render.getRenderMap().clearMap();
+			}
+		});
+		
+		mntmAuthors.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				WindowAbout About = new WindowAbout();
+				int loactionX = getX() + (getWidth() - About.getWidth())/2;
+				int loactionY = getY() + (getHeight() - About.getHeight())/2;
+				About.setLocation(loactionX, loactionY);
+				About.setModal(true);
+				About.setVisible(true);
+			}
+		});
+		
+		mntmOpcjeMapy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				WindowMapSettings mapSettings = new WindowMapSettings();
+				Map refMap = render.getRenderMap();
+				
+				int loactionX = getX() + (getWidth() - mapSettings.getWidth())/2;
+				int loactionY = getY() + (getHeight() - mapSettings.getHeight())/2;
+				mapSettings.setLocation(loactionX, loactionY);
+				
+				mapSettings.getSpnRaster().setValue(Double.valueOf(refMap.getSizeRaster()));
+				mapSettings.getSpnSizeX().setValue(Integer.valueOf(refMap.getSizeX()));
+				mapSettings.getSpnSizeY().setValue(Integer.valueOf(refMap.getSizeY()));
+				mapSettings.getSpnSizeZ().setValue(Integer.valueOf(refMap.getSizeZ()));
+				mapSettings.setModal(true);
+				mapSettings.setVisible(true);
+				
+				if (!mapSettings.isOk())
+					return;
+				
+				Point3d size = mapSettings.getSizeMap();
+				refMap.setSizeRaster(mapSettings.getSizeRaster());
+				refMap.reshapeMap((int)size.getX(), (int)size.getY(), (int)size.getZ());
+				render.getEditionMap().clearClipboard();
+				
+				rdbtnPreview.doClick();
+				initLayerSpinner();
+				setOffsetMap();
+				
+				render.getCamera().setInitialCamera(render.getRenderMap());
 			}
 		});
 		

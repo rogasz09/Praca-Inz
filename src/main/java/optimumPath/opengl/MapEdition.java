@@ -203,6 +203,15 @@ public class MapEdition implements MouseListener, MouseMotionListener{
 		clipSizeY = 0;
 	}
 	
+	//czysznie warstwy
+	public void clearLayer(Map renderMap, int layer) {
+		for (int y = 0; y < renderMap.getSizeY(); y++) {
+			for (int x = 0; x < renderMap.getSizeX(); x++) {
+				renderMap.setRaster(x, y, layer, Raster.EMPTY);
+			}
+		}
+	}
+	
 	///////////////////////////////////////////
 	
 	@Override

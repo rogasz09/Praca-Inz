@@ -3,6 +3,8 @@ package optimumPath.object;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jogamp.opengl.util.FPSAnimator;
+
 import optimumPath.common.*;
 import optimumPath.algorithms.*;
 
@@ -28,9 +30,11 @@ public class Map {
 	private boolean isAnimation;
 	private volatile int speedAnimation = 5;
 	
+	private volatile FPSAnimator animator;
+	
 	
 	////////////////////////////////////
-	// sleep
+	// watek dla algorytmu
 	public class AStarPerform implements Runnable {
 		private volatile AStar algorithmAStar;
 		private boolean isChebyshev;
@@ -103,16 +107,13 @@ public class Map {
 	public void clearMap() {
 		
 		// czyszczenie mapy
-		for(int z = 0; z < sizeZ; z++) {
-			for(int y = 0; y < sizeY; y++) {
-				for(int x = 0; x < sizeX; x++) {
-					rasterMap[z][y][x] = Raster.EMPTY;
-				}
-			}
-		}
+		clearArray(rasterMap, sizeX, sizeY, sizeZ);
 		
 		obstacleShift.clear();
 		pathShift.clear();
+		
+		openShift.clear();
+		closedShift.clear();
 		
 		isStart = false;
 		isEnd = false;
@@ -202,8 +203,9 @@ public class Map {
 		return pointFromShift(point);
 	}
 	
-	public void stepAstar(ArrayList<Node> openset, ArrayList<Node> closedset, Node actualNode) {
-		isAnimation = false;
+	synchronized public void stepAstar(ArrayList<Node> openset, ArrayList<Node> closedset, Node actualNode) {
+		//isAnimation = false;
+		animator.pause();
 		openShift.clear();
 		closedShift.clear();
 		
@@ -224,7 +226,8 @@ public class Map {
 		}
 		
 		actualShift = new Point3d((double)actualNode.getX(), (double)actualNode.getZ(), (double)actualNode.getY());
-		isAnimation = true;
+		animator.resume();
+		//isAnimation = true;
 		
 		try {
 	        Thread.sleep(10*this.speedAnimation);
@@ -283,6 +286,38 @@ public class Map {
 		return false;
 	}
 	
+	public void clearArray(Raster[][][] inputMap, int sizeX, int sizeY, int sizeZ) {
+		for(int z = 0; z < sizeZ; z++) {
+			for(int y = 0; y < sizeY; y++) {
+				for(int x = 0; x < sizeX; x++) {
+					inputMap[z][y][x] = Raster.EMPTY;
+				}
+			}
+		}
+	}
+	
+	public void reshapeMap(int sizeX, int sizeY, int sizeZ) {
+		int minSizeX = (this.sizeX > sizeX) ? sizeX : this.sizeX;
+		int minSizeY = (this.sizeY > sizeY) ? sizeY : this.sizeY;
+		int minSizeZ = (this.sizeZ > sizeZ) ? sizeZ : this.sizeZ;
+		
+		Raster newMap[][][] = new Raster[sizeZ][sizeY][sizeX];
+		clearArray(newMap, sizeX, sizeY, sizeZ);
+		
+		for(int z = 0; z < minSizeZ; z++) {
+			for(int y = 0; y < minSizeY; y++) {
+				for(int x = 0; x < minSizeX; x++) {
+					newMap[z][y][x] = rasterMap[z][y][x];
+				}
+			}
+		}
+		
+		setSize(sizeX, sizeY, sizeZ);
+		rasterMap = newMap;
+		
+		makeShiftList();
+	}
+	
 	public void resetRaster(int x, int y, int z) {
 		Raster type = rasterMap[z][y][x];
 		rasterMap[z][y][x] = Raster.EMPTY;
@@ -305,6 +340,15 @@ public class Map {
 		
 	}
 	
+	public void resetPath() {
+		for(int i = 0; i < pathShift.size(); i++) {
+			Point3d raster = this.pointFromShift(pathShift.get(i));
+			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
+		}
+		
+		pathShift.clear();
+	}
+	
 	
 	/////////////////////////////////////////
 	// WYKONANIE ALGORYTMOW
@@ -313,7 +357,7 @@ public class Map {
 		if(algProcessor != null)
 			return;
 		
-		AStar algorithmAStar = new AStar(this, sizeZ, sizeY, sizeX);
+		AStar algorithmAStar = new AStar(this);
 		
 		algProcessor = new AStarPerform(algorithmAStar, isChebyshev);
 		Thread algThread = new Thread(algProcessor);
@@ -327,15 +371,6 @@ public class Map {
 		closedShift.clear();
 		isAnimation = false;
 		algProcessor = null;
-	}
-	
-	public void resetPath() {
-		for(int i = 0; i < pathShift.size(); i++) {
-			Point3d raster = this.pointFromShift(pathShift.get(i));
-			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
-		}
-		
-		pathShift.clear();
 	}
 	
 	////////////////////////////////////
@@ -522,8 +557,10 @@ public class Map {
 	public void setAlgProcessor(AStarPerform algProcessor) {
 		this.algProcessor = algProcessor;
 	}
-	
-	
+
+	public void setAnimator(FPSAnimator animator) {
+		this.animator = animator;
+	}
 
 	/////////////////////////////////////////////
 	

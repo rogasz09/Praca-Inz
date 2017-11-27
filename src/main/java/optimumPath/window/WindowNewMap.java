@@ -17,6 +17,7 @@ import javax.swing.SpinnerNumberModel;
 import optimumPath.common.Point3d;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Font;
 
 public class WindowNewMap extends JDialog {
 	/**
@@ -50,15 +51,16 @@ public class WindowNewMap extends JDialog {
 		JLabel lblRozmiarY = new JLabel("Rozmiar Y:");
 		JLabel lblRozmiarZ = new JLabel("Rozmiar Z:");
 		
-		JLabel lblUstawieniaRozmiaruMapy = new JLabel("Ustawienia rozmiaru mapy");
+		JLabel lblUstawieniaRozmiaruMapy = new JLabel("Ustawienia rozmiaru mapy:");
+		lblUstawieniaRozmiaruMapy.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
 		spnSizeX = new JSpinner();
 		spnSizeY = new JSpinner();
 		spnSizeZ = new JSpinner();
 		
-		spnSizeX.setModel(new SpinnerNumberModel(10, 3, 100, 1));
-		spnSizeY.setModel(new SpinnerNumberModel(10, 3, 100, 1));
-		spnSizeZ.setModel(new SpinnerNumberModel(10, 1, 100, 1));
+		spnSizeX.setModel(new SpinnerNumberModel(10, 3, 50, 1));
+		spnSizeY.setModel(new SpinnerNumberModel(10, 3, 50, 1));
+		spnSizeZ.setModel(new SpinnerNumberModel(10, 1, 50, 1));
 		
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(
@@ -111,7 +113,7 @@ public class WindowNewMap extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
-				cancelButton = new JButton("Cancel");
+				cancelButton = new JButton("Anuluj");
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
