@@ -50,6 +50,8 @@ import optimumPath.opengl.*;
 import optimumPath.object.Map;
 import optimumPath.common.Point3d;
 import optimumPath.JSON.*;
+import optimumPath.algorithms.Algorithm;
+
 import java.awt.Component;
 import javax.swing.JCheckBox;
 import java.awt.event.MouseAdapter;
@@ -58,6 +60,12 @@ import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import javax.swing.JRadioButtonMenuItem;
+import java.awt.FlowLayout;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.MatteBorder;
+import java.awt.SystemColor;
+import javax.swing.SwingConstants;
 
 
 public class WindowMain extends JFrame {
@@ -73,7 +81,6 @@ public class WindowMain extends JFrame {
 	private JMenuBar menuBar;
 	private JSlider sliderAnimSpeed;
 	private JButton btnApply;
-	private JPanel GLpanel;
 	private JSpinner spnLayer;
 	private JRadioButton rdbtnPreview, rdbtnMapMod;
 	private JComboBox cbAlgorithm, cbMetrics;
@@ -113,6 +120,12 @@ public class WindowMain extends JFrame {
 	private JMenuItem mntmOpcjeMapy;
 	private JMenuItem mntmUstawieniaKolorw;
 	private JSeparator separator_4;
+	private JPanel GLpanel;
+	private JLabel txtAlg;
+	private JLabel txtMetric;
+	private JLabel txtPathLeng;
+	private JLabel txtNumbRaster;
+	private JLabel txtIteration;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -121,7 +134,7 @@ public class WindowMain extends JFrame {
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
 		setResizable(false);
-		setBounds(100, 100, 1041, 774);
+		setBounds(100, 100, 1041, 804);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		this.render = render;
@@ -129,13 +142,18 @@ public class WindowMain extends JFrame {
 		this.fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "JSON", "json");
 		this.fc.setFileFilter(filter);
+		this.render.setWindow(this);
 		this.render.getCamera().setInitialCamera(this.render.getRenderMap());;
 		
 		initComponents();
+		
 		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
+		GLpanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
 		createEvents();
 		initLayerSpinner();
-		
+		setTxtAlgMetric();
+		getResults();
 		//wpiêcie okna opengl do JPanel
 		//
 	}
@@ -450,8 +468,92 @@ public class WindowMain extends JFrame {
 		);
 		panelAnim.setLayout(gl_panelAnim);
 		
+		JPanel panelMain = new JPanel();
+		contentPanel.add(panelMain, BorderLayout.CENTER);
+		panelMain.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panelConsole = new JPanel();
+		panelConsole.setBorder(new MatteBorder(2, 2, 2, 2, (Color) Color.LIGHT_GRAY));
+		panelConsole.setBackground(SystemColor.control);
+		panelMain.add(panelConsole, BorderLayout.SOUTH);
+		
+		JLabel lblNewLabel = new JLabel("D\u0142ugo\u015B\u0107 \u015Bcie\u017Cki: ");
+		
+		JLabel lblNewLabel_1 = new JLabel("Algorytm: ");
+		
+		JLabel lblNewLabel_2 = new JLabel("Metryka: ");
+		
+		JLabel lblNewLabel_3 = new JLabel("Ilo\u015B\u0107 iteracji: ");
+		
+		JLabel lblNewLabel_4 = new JLabel("Ilo\u015B\u0107 rastr\u00F3w \u015Bcie\u017Cki: ");
+		
+		txtAlg = new JLabel("");
+		txtAlg.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		txtMetric = new JLabel("");
+		txtMetric.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		txtPathLeng = new JLabel("");
+		txtPathLeng.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		txtNumbRaster = new JLabel("");
+		txtNumbRaster.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		txtIteration = new JLabel("");
+		txtIteration.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		GroupLayout gl_panelConsole = new GroupLayout(panelConsole);
+		gl_panelConsole.setHorizontalGroup(
+			gl_panelConsole.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelConsole.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblNewLabel_1)
+						.addComponent(lblNewLabel_2))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(txtMetric, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(txtAlg, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblNewLabel)
+						.addComponent(lblNewLabel_4))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(txtNumbRaster, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(txtPathLeng, GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
+					.addGap(32)
+					.addComponent(lblNewLabel_3)
+					.addGap(6)
+					.addComponent(txtIteration, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(231, Short.MAX_VALUE))
+		);
+		gl_panelConsole.setVerticalGroup(
+			gl_panelConsole.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_panelConsole.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.TRAILING)
+						.addComponent(lblNewLabel_3)
+						.addComponent(txtIteration, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
+						.addComponent(txtAlg, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblNewLabel_1)
+						.addComponent(lblNewLabel)
+						.addComponent(txtPathLeng, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(gl_panelConsole.createParallelGroup(Alignment.TRAILING)
+						.addGroup(gl_panelConsole.createSequentialGroup()
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(lblNewLabel_2))
+						.addComponent(txtMetric, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblNewLabel_4)
+						.addComponent(txtNumbRaster, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE))
+					.addGap(13))
+		);
+		panelConsole.setLayout(gl_panelConsole);
+		
 		GLpanel = new JPanel();
-		contentPanel.add(GLpanel, BorderLayout.CENTER);
+		panelMain.add(GLpanel, BorderLayout.CENTER);
+		
 		
 		///////////////////////////////////////////////////
 		// Pasek narzêdzi
@@ -574,6 +676,18 @@ public class WindowMain extends JFrame {
 		btnDelObst.setSelected(mntmDelObstacle.isSelected());
 		btnStart.setSelected(mntmCheckStartPoint.isSelected());
 		btnEnd.setSelected(mntmCheckStopPoint.isSelected());
+	}
+	
+	public void setTxtAlgMetric() {
+		txtAlg.setText(cbAlgorithm.getSelectedItem().toString());
+		txtMetric.setText(cbMetrics.getSelectedItem().toString());
+	}
+	
+	public void getResults() {
+		double length = Math.round(render.getRenderMap().getLengthPath() * 100.0) / 100.0;
+		txtIteration.setText(((Integer)render.getRenderMap().getNumberIteration()).toString());
+		txtNumbRaster.setText(((Integer)render.getRenderMap().getNumberRasterPath()).toString());
+		txtPathLeng.setText(((Double)length).toString());
 	}
 	
 	///////////////////////////////////////////////////////////////////
@@ -825,6 +939,20 @@ public class WindowMain extends JFrame {
 				setOffsetMap();
 				
 				render.getCamera().setInitialCamera(render.getRenderMap());
+			}
+		});
+		
+		cbAlgorithm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setTxtAlgMetric();
+				getResults();
+			}
+		});
+		
+		cbMetrics.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setTxtAlgMetric();
+				getResults();
 			}
 		});
 		

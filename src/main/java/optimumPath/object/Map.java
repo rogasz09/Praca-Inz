@@ -29,8 +29,13 @@ public class Map {
 	private boolean isStart, isEnd;
 	private boolean isAnimation;
 	private volatile int speedAnimation = 5;
-	final int MAX_ANIM_SPEED = 105;
 	
+	private Algorithm algorithm;
+	private int numberIteration = 0;
+	private int numberRasterPath = 0;
+	private double lengthPath = 0.0;
+	
+	final int MAX_ANIM_SPEED = 105;
 	private volatile FPSAnimator animator;
 	
 	
@@ -374,6 +379,7 @@ public class Map {
 			return;
 		
 		AStar algorithmAStar = new AStar(this);
+		algorithm = algorithmAStar;
 		
 		algProcessor = new AlgorithmPerform(true, isChebyshev);
 		algProcessor.setAStar(algorithmAStar);
@@ -387,6 +393,7 @@ public class Map {
 			return;
 		
 		WavePropagation algorithmWP = new WavePropagation(this);
+		algorithm = algorithmWP;
 		
 		algProcessor = new AlgorithmPerform(false, isChebyshev);
 		algProcessor.setWavePropagation(algorithmWP);
@@ -395,7 +402,11 @@ public class Map {
 		
 	}
 	
-	public void resultAlgorithm() {
+	public void resultAlgorithm() {	
+		numberIteration = algorithm.getNumberIteration();
+		numberRasterPath = algorithm.getNumberRasterPath();
+		lengthPath = algorithm.getLengthPath();
+		
 		makeShiftList();
 		openShift.clear();
 		closedShift.clear();
@@ -591,6 +602,32 @@ public class Map {
 	public void setAnimator(FPSAnimator animator) {
 		this.animator = animator;
 	}
+
+	public int getNumberIteration() {
+		return numberIteration;
+	}
+
+	public void setNumberIteration(int numberIteration) {
+		this.numberIteration = numberIteration;
+	}
+
+	public int getNumberRasterPath() {
+		return numberRasterPath;
+	}
+
+	public void setNumberRasterPath(int numberRasterPath) {
+		this.numberRasterPath = numberRasterPath;
+	}
+
+	public double getLengthPath() {
+		return lengthPath;
+	}
+
+	public void setLengthPath(double lengthPath) {
+		this.lengthPath = lengthPath;
+	}
+
+	
 
 	/////////////////////////////////////////////
 	

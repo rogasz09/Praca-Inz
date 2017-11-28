@@ -25,6 +25,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
 
 import optimumPath.object.*;
+import optimumPath.window.WindowMain;
 import optimumPath.common.*;
 
 /**
@@ -47,6 +48,7 @@ public class Render implements GLEventListener {
 	private boolean isAStar = false;
 
 	public static DisplayMode dm, dm_old;
+	private WindowMain window;
 
 	public Render() {
 		// getting the capabilities object of GL2 profile
@@ -108,8 +110,10 @@ public class Render implements GLEventListener {
 		}
 		
 		if (renderMap.getAlgProcessor() != null)
-			if(renderMap.getAlgProcessor().isFinish())
+			if(renderMap.getAlgProcessor().isFinish()) {
 				renderMap.resultAlgorithm();
+				window.getResults();
+			}
 
 		//gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
@@ -501,6 +505,12 @@ public class Render implements GLEventListener {
 	public void setAStar(boolean isAStar) {
 		this.isAStar = isAStar;
 	}
+
+	public void setWindow(WindowMain window) {
+		this.window = window;
+	}
+	
+	
 	
 	//////////////////
 

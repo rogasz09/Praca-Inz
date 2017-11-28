@@ -131,6 +131,8 @@ public class WavePropagation extends Algorithm{
 			iteration += 1;
 		}
 		
+		numberIteration = iteration;
+		
 		if (!isPath) {
 			System.out.println("Nie znaleziono œcie¿ki");
 		} else {
@@ -168,6 +170,9 @@ public class WavePropagation extends Algorithm{
 			}
 		}
 
+		lengthPath = node.getF();
+		numberRasterPath = getPath().size();
+		
 		getPath().remove(0);
 		getPath().remove(getPath().size() - 1);
 	}

@@ -16,6 +16,10 @@ public class Algorithm {
 
 	private ArrayList<Node> path;
 	protected Map renderMap;
+	
+	protected int numberIteration;
+	protected int numberRasterPath;
+	protected double lengthPath;
 
 	public Algorithm(Map inputMap) {
 		initMap(inputMap);
@@ -353,6 +357,30 @@ public class Algorithm {
 
 	public void setPath(ArrayList<Node> path) {
 		this.path = path;
+	}
+
+	public int getNumberIteration() {
+		return numberIteration;
+	}
+
+	public void setNumberIteration(int numberIteration) {
+		this.numberIteration = numberIteration;
+	}
+
+	public int getNumberRasterPath() {
+		return numberRasterPath;
+	}
+
+	public void setNumberRasterPath(int numberRasterPath) {
+		this.numberRasterPath = numberRasterPath;
+	}
+
+	public double getLengthPath() {
+		return lengthPath;
+	}
+
+	public void setLengthPath(double lengthPath) {
+		this.lengthPath = lengthPath;
 	}
 	
 	//////////////////////////////////////////////

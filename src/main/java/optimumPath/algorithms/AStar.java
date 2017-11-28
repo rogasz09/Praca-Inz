@@ -38,7 +38,11 @@ public class AStar extends Algorithm {
 		boolean isPath = false;
 		int x = 0;
 
+		numberIteration = 0;
+		
 		while (!openset.isEmpty()) {
+			numberIteration += 1;
+			
 			x = getLowestFCostIndex(openset);
 			Node actualNode = openset.get(x);
 
@@ -112,13 +116,17 @@ public class AStar extends Algorithm {
 
 		Node currentNode = endNode;
 		this.getPath().add(currentNode);
-
+		
+		
 		while (!isSameNode(currentNode, currentNode.getParent())) {
 			//printNode(currentNode);
 			//printNode(currentNode.getParent());
 			currentNode = currentNode.getParent();
 			getPath().add(currentNode);
 		}
+		
+		lengthPath = endNode.getG();
+		numberRasterPath = getPath().size();
 
 		this.getPath().remove(0);
 		this.getPath().remove(getPath().size() - 1);
