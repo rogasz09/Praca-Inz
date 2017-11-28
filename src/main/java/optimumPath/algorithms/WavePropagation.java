@@ -70,6 +70,9 @@ public class WavePropagation extends Algorithm{
 	//	GLOWNY ALGORYTM PROPAGACJI FALI
 	
 	public void perform(boolean isChebyshev) {
+		if(!checkSatartEnd())
+			return;
+		
 		ArrayList<Node> freeRasters = getFreeRasterList();
 		
 		ArrayList<Node> actualNodes = new ArrayList<Node>();
@@ -134,7 +137,7 @@ public class WavePropagation extends Algorithm{
 		numberIteration = iteration;
 		
 		if (!isPath) {
-			System.out.println("Nie znaleziono œcie¿ki");
+			noPath();
 		} else {
 			System.out.println("Znaleziono œcie¿kê");
 			reconstructPath(getStartNode(), processedNodes, isChebyshev);

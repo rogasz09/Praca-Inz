@@ -17,6 +17,9 @@ public class AStar extends Algorithm {
 	}
 
 	public void perform(boolean isChebyshev) {
+		if(!checkSatartEnd())
+			return;
+		
 		ArrayList<Node> closedset = new ArrayList<Node>();
 		ArrayList<Node> openset = new ArrayList<Node>();
 		ArrayList<Node> neighbours;
@@ -104,7 +107,7 @@ public class AStar extends Algorithm {
 		}
 
 		if (!isPath) {
-			System.out.println("Nie znaleziono œcie¿ki");
+			noPath();
 		} else {
 			System.out.println("Znaleziono œcie¿kê");
 			reconstructPath(openset.get(x));

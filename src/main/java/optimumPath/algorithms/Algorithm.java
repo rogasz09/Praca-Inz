@@ -2,6 +2,8 @@ package optimumPath.algorithms;
 
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import optimumPath.common.Raster;
 import optimumPath.object.Map;
 
@@ -34,9 +36,9 @@ public class Algorithm {
 
 		// I madethis initialization, in case to avoid problems with no start or end
 		// point
-		startNode = new Node(0, 0, 0, Raster.START);
-		endNode = new Node(1, 1, 1, Raster.END);
-
+		startNode = null;
+		endNode = null;
+		
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
 				for (int x = 0; x < sizeX; x++) {
@@ -114,6 +116,30 @@ public class Algorithm {
 	}
 	/*****************************************************/
 	
+	
+	public static void issueInfoBox(String infoMessage, String issueTitle) {
+        JOptionPane.showMessageDialog(null, infoMessage, "Problem: " + issueTitle, JOptionPane.INFORMATION_MESSAGE);
+    }
+	
+	public boolean checkSatartEnd() {
+		if (!renderMap.isStart() && !renderMap.isEnd()) {
+			issueInfoBox("Na mapie nie zaznaczono punktu startowego i koñcowego", "brak punktu start i koniec");
+			return false;
+		}
+		if (!renderMap.isStart()) {
+			issueInfoBox("Na mapie nie zaznaczono punktu startowego", "brak punktu start");
+			return false;
+		}
+		if (!renderMap.isEnd()) {
+			issueInfoBox("Na mapie nie zaznaczono punktu koñcowego", "brak punktu koniec");
+			return false;
+		}
+		return true;
+	}
+	
+	public void noPath() {
+		issueInfoBox("Algorytm nie znalaz³ scie¿ki", "brak œcie¿ki");
+	}
 	
 	// zapisuje sciezke do mapy rastrow
 	public void writePathToMap(Raster[][][] rasterMap) {

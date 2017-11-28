@@ -142,15 +142,15 @@ public class Render implements GLEventListener {
 
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glShadeModel(GL2.GL_SMOOTH);
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		gl.glClearColor(0.95f, 0.95f, 0.95f, 0.0f);
 		gl.glClearDepth(1.0f);
-		gl.glEnable(GL2.GL_DEPTH_TEST);
 		// przezroczystosc
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
+		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LESS);
-		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
+		//gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
 		// gl.glEnable (GL2.GL_COLOR_MATERIAL);
 		// gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
 		// gl.glMaterialf(GL2.GL_SHININESS, 100.0);
@@ -158,7 +158,7 @@ public class Render implements GLEventListener {
 		// definicja œwiat³a
 		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float light_position[] = { 0.0f, 0.0f, 2.0f, 1.0f };
+		float light_position[] = { 6.0f, 9.0f, 10.0f, 9.0f };
 
 		float lmodel_ambient[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 		float local_view[] = { 0.0f };
@@ -194,11 +194,16 @@ public class Render implements GLEventListener {
 	// rysowanie podstawy
 	public void drawBase(GL2 gl) {
 
+		
 		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, 1.0f };
+		float mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
+		float mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float halfSizeRaster = (float) renderMap.getSizeRaster() / 2;
 
 		gl.glPushMatrix();
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_ambient_color, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
 		gl.glBegin(GL2.GL_QUADS);
 
 		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster, -halfSizeRaster);

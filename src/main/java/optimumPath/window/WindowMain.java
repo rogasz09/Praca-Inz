@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -25,9 +26,10 @@ import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.ToolTipManager;
 import javax.swing.border.TitledBorder;
-
+import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -54,6 +56,8 @@ import optimumPath.algorithms.Algorithm;
 
 import java.awt.Component;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.KeyStroke;
@@ -117,8 +121,8 @@ public class WindowMain extends JFrame {
 	private JMenuItem mntmClearLayer;
 	private JMenuItem mntmClearMap;
 	private JMenu mnNarzdzia;
-	private JMenuItem mntmOpcjeMapy;
-	private JMenuItem mntmUstawieniaKolorw;
+	private JMenuItem mntmMapSettings;
+	private JMenuItem mntmColorSettings;
 	private JSeparator separator_4;
 	private JPanel GLpanel;
 	private JLabel txtAlg;
@@ -249,11 +253,11 @@ public class WindowMain extends JFrame {
 		JSeparator separator = new JSeparator();
 		mnNarzdzia.add(separator);
 		
-		mntmOpcjeMapy = new JMenuItem("Ustawienia mapy");
-		mnNarzdzia.add(mntmOpcjeMapy);
+		mntmMapSettings = new JMenuItem("Ustawienia mapy");
+		mnNarzdzia.add(mntmMapSettings);
 		
-		mntmUstawieniaKolorw = new JMenuItem("Ustawienia kolor\u00F3w");
-		mnNarzdzia.add(mntmUstawieniaKolorw);
+		mntmColorSettings = new JMenuItem("Ustawienia kolor\u00F3w");
+		mnNarzdzia.add(mntmColorSettings);
 		
 		mnHelp = new JMenu("Pomoc");
 		menuBar.add(mnHelp);
@@ -910,7 +914,7 @@ public class WindowMain extends JFrame {
 			}
 		});
 		
-		mntmOpcjeMapy.addActionListener(new ActionListener() {
+		mntmMapSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				WindowMapSettings mapSettings = new WindowMapSettings();
 				Map refMap = render.getRenderMap();
@@ -939,6 +943,12 @@ public class WindowMain extends JFrame {
 				setOffsetMap();
 				
 				render.getCamera().setInitialCamera(render.getRenderMap());
+			}
+		});
+		
+		mntmColorSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showColorChooser();
 			}
 		});
 		
@@ -988,6 +998,31 @@ public class WindowMain extends JFrame {
 		btnDelObst.addActionListener(GroupToolbarListener);
 		btnStart.addActionListener(GroupToolbarListener);
 		btnEnd.addActionListener(GroupToolbarListener);
+	}
+	
+	public Color showColorChooser() {
+		JColorChooser cc = new JColorChooser();
+        AbstractColorChooserPanel[] panels = cc.getChooserPanels();
+
+        JPanel p = new JPanel();
+        panels[3].setBorder( new TitledBorder(panels[3].getDisplayName()));
+        p.add(panels[3]);
+
+        JPanel gui = new JPanel(new BorderLayout(2,2));
+        gui.add(p, BorderLayout.CENTER);
+        gui.add(cc.getPreviewPanel(), BorderLayout.SOUTH);
+
+        JDialog colorRGB = new JDialog();
+        colorRGB.getContentPane().setLayout(new BorderLayout());
+        colorRGB.add(gui, BorderLayout.CENTER);
+        colorRGB.setBounds(100, 100, 650, 400);
+        colorRGB.setTitle("Wybór koloru");
+       
+        colorRGB.setResizable(false);
+        colorRGB.setModal(true);
+        colorRGB.setVisible(true);
+        
+		return cc.getColor();
 	}
 
 	public JPanel getGLpanel() {
