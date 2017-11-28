@@ -44,6 +44,7 @@ public class Render implements GLEventListener {
 	private int offsetLayer = 0;
 	private boolean isMapCreation = false;
 	private boolean isAnimation = false;
+	private boolean isAStar = false;
 
 	public static DisplayMode dm, dm_old;
 
@@ -99,7 +100,9 @@ public class Render implements GLEventListener {
 		drawPath(gl);
 		
 		if (renderMap.isAnimation()) {
-			drawActual(gl);
+			if (isAStar)
+				drawActual(gl);
+			
 			drawClosed(gl);
 			drawOpen(gl);
 		}
@@ -336,6 +339,7 @@ public class Render implements GLEventListener {
 
 	///////////////////////////////////////////////
 	/// Algorytm AStar
+	
 	////////////////////////
 	// rysowanie zamkniete
 	public void drawClosed(GL2 gl) {
@@ -361,7 +365,7 @@ public class Render implements GLEventListener {
 	public void drawOpen(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.3f }; // kolor, ostatni parametr okresla przezroczystosc
+		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.4f }; // kolor, ostatni parametr okresla przezroczystosc
 
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 
@@ -490,6 +494,13 @@ public class Render implements GLEventListener {
 		this.renderMap.setAnimation(isAnimation);
 	}
 
+	public boolean isAStar() {
+		return isAStar;
+	}
+
+	public void setAStar(boolean isAStar) {
+		this.isAStar = isAStar;
+	}
 	
 	//////////////////
 

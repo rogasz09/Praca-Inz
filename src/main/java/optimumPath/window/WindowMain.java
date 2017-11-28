@@ -752,13 +752,19 @@ public class WindowMain extends JFrame {
 				boolean isChebyshev = false;
 				if (cbMetrics.getSelectedIndex() == 1)
 					isChebyshev = true;
-				render.getRenderMap().performAStar(isChebyshev);
+				if (cbAlgorithm.getSelectedIndex() == 1) {
+					render.getRenderMap().performAStar(isChebyshev);
+					render.setAStar(true);
+				} else {
+					render.getRenderMap().performWavePropagation(isChebyshev);
+					render.setAStar(false);
+				}
 			}
 		});
 		
-		sliderAnimSpeed.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
+		
+		sliderAnimSpeed.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 			}
 		});

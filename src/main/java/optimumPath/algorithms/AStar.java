@@ -5,200 +5,15 @@ import java.util.ArrayList;
 import optimumPath.common.*;
 import optimumPath.object.*;
 
-public class AStar {
-
-	private Raster map[][][];
-	private Map renderMap;
-	int sizeX;
-	int sizeY;
-	int sizeZ;
-
-	private Node startNode;
-	private Node endNode;
-
-	private ArrayList<Node> path;
+public class AStar extends Algorithm {
 
 	public AStar(Map inputMap) {
-		initMap(inputMap);
-	}
-
-	public void initMap(Map inputMap) {
-		this.renderMap = inputMap;
-		this.sizeZ = inputMap.getSizeZ();
-		this.sizeY = inputMap.getSizeY();
-		this.sizeX = inputMap.getSizeX();
-		this.map = new Raster[sizeZ][sizeY][sizeX];
-
-		// I madethis initialization, in case to avoid problems with no start or end
-		// point
-		startNode = new Node(0, 0, 0, Raster.START);
-		endNode = new Node(1, 1, 1, Raster.END);
-
-		// printMap(inputMap);
-
-		for (int z = 0; z < sizeZ; z++) {
-			for (int y = 0; y < sizeY; y++) {
-				for (int x = 0; x < sizeX; x++) {
-					map[z][y][x] = inputMap.getRasterMap()[z][y][x];
-
-					if (map[z][y][x] == Raster.START) {
-						startNode = new Node(z, y, x, Raster.START);
-					}
-					if (map[z][y][x] == Raster.END) {
-						endNode = new Node(z, y, x, Raster.END);
-					}
-
-				}
-			}
-		}
-
-	}
-
-	private void printMap(Raster[][][] inputMap) {
-		for (int z = 0; z < sizeZ; z++) {
-			for (int y = 0; y < sizeY; y++) {
-				for (int x = 0; x < sizeX; x++) {
-					switch (inputMap[z][y][x]) {
-					case START: {
-						System.out.print("1 ");
-						break;
-					}
-					case END: {
-						System.out.print("2 ");
-						break;
-					}
-					case OBSTACLE: {
-						System.out.print("# ");
-						break;
-					}
-					case FORBIDDEN: {
-						System.out.print("@ ");
-						break;
-					}
-					case EMPTY: {
-						System.out.print("0 ");
-						break;
-					}
-					default:
-						System.out.print("0 ");
-					}
-				}
-				System.out.print('\n');
-			}
-			System.out.print('\n');
-		}
-	}
-
-	private void printList(ArrayList<Node> list) {
-		System.out.print("List: ");
-		for (int i = 0; i < list.size(); i++) {
-			printNode(list.get(i));
-		}
-		System.out.print('\n');
-	}
-
-	private void printNode(Node node) {
-		System.out.print("( ");
-		System.out.print(Integer.toString(node.getX()) + " ");
-		System.out.print(Integer.toString(node.getY()) + " ");
-		System.out.print(Integer.toString(node.getZ()) + " ");
-		System.out.print("), ");
-	}
-
-	public void writePathToMap(Raster[][][] rasterMap) {
-		if (path == null)
-			return;
-
-		for (int i = 0; i < path.size(); i++) {
-			Node currentNode = path.get(i);
-			rasterMap[currentNode.getZ()][currentNode.getY()][currentNode.getX()] = Raster.PATH;
-		}
+		super(inputMap);
 	}
 	
 	private double getChebyshevCost(Node actualNode,Node neighbour) {
 		int direction =  checkChebyshevDirection(actualNode, neighbour);
 		return Math.sqrt((double)direction);
-	}
-	
-	private int checkChebyshevDirection(Node actualNode,Node neighbour) {
-		int sameX,sameY,sameZ;
-		int sum = 0;
-		sameX = (actualNode.getX()==neighbour.getX()) ? 0 : 1;
-		sameY = (actualNode.getY()==neighbour.getY()) ? 0 : 1;
-		sameZ = (actualNode.getZ()==neighbour.getZ()) ? 0 : 1;
-		sum = sameX + sameY + sameZ;
-		return sum;
-	}
-
-	private boolean checkPossibleTransition(Node actualNode,Node neighbour) {
-		int direction =  checkChebyshevDirection(actualNode, neighbour);
-		
-		ArrayList<Node> neighboursActual = possibleNeighboursChebyshev(actualNode);
-		ArrayList<Node> neighboursNeighbour = possibleNeighboursChebyshev(neighbour);
-		ArrayList<Node> shared = commonPart(neighboursActual, neighboursNeighbour);
-		
-		if (direction == 3) {
-			for (int i = 0; i < shared.size(); i++) {
-				int x = shared.get(i).getX();
-				int y = shared.get(i).getY();
-				int z = shared.get(i).getZ();
-				if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
-					return false;
-				} 
-			}
-			return true;
-		}
-		if (direction == 2) {
-			if (actualNode.getX() == neighbour.getX()) {
-				for (int i = 0; i < shared.size(); i++) {
-					int x = shared.get(i).getX();
-					int y = shared.get(i).getY();
-					int z = shared.get(i).getZ();
-					if(actualNode.getX() == x)
-						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
-							return false;
-					} else
-						continue;
-				}
-				return true;
-			} else if(actualNode.getY() == neighbour.getY()) {
-				for (int i = 0; i < shared.size(); i++) {
-					int x = shared.get(i).getX();
-					int y = shared.get(i).getY();
-					int z = shared.get(i).getZ();
-					if(actualNode.getY() == y)
-						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
-							return false;
-					} else
-						continue;
-				}
-				return true;
-			} else {
-				for (int i = 0; i < shared.size(); i++) {
-					int x = shared.get(i).getX();
-					int y = shared.get(i).getY();
-					int z = shared.get(i).getZ();
-					if(actualNode.getZ() == z)
-						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
-							return false;
-					} else
-						continue;
-				}
-				return true;
-			}
-		}
-		return true;
-	}
-	
-	private ArrayList<Node> commonPart(ArrayList<Node> list1, ArrayList<Node> list2) {
-		ArrayList<Node> listCommon = new ArrayList<Node>();
-		
-		for(int i = 0; i < list1.size(); i++)
-			for(int j = 0; j < list2.size(); j++) {
-				if (isSameNode(list1.get(i), list2.get(j)))
-					listCommon.add(list1.get(i));
-			}
-		return listCommon;
 	}
 
 	public void perform(boolean isChebyshev) {
@@ -210,19 +25,15 @@ public class AStar {
 		g = 0.0;
 		
 		if (isChebyshev) {
-			h = count_h_chebyshev(startNode);
+			h = count_h_chebyshev(getStartNode());
 		} else {
-			h = count_h_manhattan(startNode);
+			h = count_h_manhattan(getStartNode());
 		}
 		f = g + h;
-		startNode.setGHF(g, h, f);
-		startNode.setParent(startNode);
+		getStartNode().setGHF(g, h, f);
+		getStartNode().setParent(getStartNode());
 
-		//printNode(startNode);
-		//printNode(endNode);
-		openset.add(startNode);
-		// openset.addAll(this.getNeighboursManhattan(startNode));
-		// int x;
+		openset.add(getStartNode());
 
 		boolean isPath = false;
 		int x = 0;
@@ -231,7 +42,7 @@ public class AStar {
 			x = getLowestFCostIndex(openset);
 			Node actualNode = openset.get(x);
 
-			if (isSameNode(openset.get(x), endNode)) {
+			if (isSameNode(openset.get(x), getEndNode())) {
 				isPath = true;
 				break;
 			}
@@ -297,46 +108,22 @@ public class AStar {
 	}
 
 	private void reconstructPath(Node endNode) {
-		path = new ArrayList<Node>();
+		this.setPath(new ArrayList<Node>());
 
 		Node currentNode = endNode;
-		path.add(currentNode);
+		this.getPath().add(currentNode);
 
 		while (!isSameNode(currentNode, currentNode.getParent())) {
 			//printNode(currentNode);
 			//printNode(currentNode.getParent());
 			currentNode = currentNode.getParent();
-			path.add(currentNode);
+			getPath().add(currentNode);
 		}
 
-		path.remove(0);
-		path.remove(path.size() - 1);
+		this.getPath().remove(0);
+		this.getPath().remove(getPath().size() - 1);
 	}
 
-	private boolean isInSet(Node currentNode, ArrayList<Node> list) {
-		for (int i = 0; i < list.size(); i++) {
-			if (isSameNode(list.get(i), currentNode))
-				return true;
-		}
-		return false;
-	}
-
-	private boolean isSameNode(Node node1, Node node2) {
-		if (node1.getZ() == node2.getZ())
-			if (node1.getY() == node2.getY())
-				if (node1.getX() == node2.getX())
-					return true;
-
-		return false;
-	}
-
-	private int getNodeFromList(Node currentNode, ArrayList<Node> list) {
-		for (int i = 0; i < list.size(); i++) {
-			if (isSameNode(list.get(i), currentNode))
-				return i;
-		}
-		return -1;
-	}
 
 	private int getLowestFCostIndex(ArrayList<Node> openset) {
 		double lowestFCost = openset.get(0).getF();
@@ -353,61 +140,31 @@ public class AStar {
 	}
 
 	private double count_h_manhattan(Node currentNode) {
-		return Math.abs(currentNode.getZ() - endNode.getZ()) + Math.abs(currentNode.getY() - endNode.getY())
-				+ Math.abs(currentNode.getX() - endNode.getX());
+		return Math.abs(currentNode.getZ() - getEndNode().getZ()) +
+			   Math.abs(currentNode.getY() - getEndNode().getY()) +
+			   Math.abs(currentNode.getX() - getEndNode().getX());
 	}
 
 	private double count_h_chebyshev(Node currentNode) {
-		return Math.sqrt(Math.pow(currentNode.getZ() - endNode.getZ(), 2)
-				+ Math.pow(currentNode.getY() - endNode.getY(), 2) + Math.pow(currentNode.getX() - endNode.getX(), 2));
+		return Math.sqrt(Math.pow(currentNode.getZ() - getEndNode().getZ(), 2) + 
+			   Math.pow(currentNode.getY() - getEndNode().getY(), 2) + 
+			   Math.pow(currentNode.getX() - getEndNode().getX(), 2));
 	}
 
 	// check if a raster is in map and if it is not obstacle or forbidden
 	private boolean checkNode(int z, int y, int x) {
 
-		if (z < sizeZ && z >= 0) {
-			if (y < sizeY && y >= 0) {
-				if (x < sizeX && x >= 0) {
+		if (z < this.getSizeZ() && z >= 0) {
+			if (y < this.getSizeY() && y >= 0) {
+				if (x < this.getSizeX() && x >= 0) {
 
-					if (map[z][y][x] != Raster.FORBIDDEN && map[z][y][x] != Raster.OBSTACLE) {
+					if (getMap()[z][y][x] != Raster.FORBIDDEN && getMap()[z][y][x] != Raster.OBSTACLE) {
 						return true;
 					}
 				}
 			}
 		}
 		return false;
-	}
-
-	private ArrayList<Node> possibleNeighboursManhattan(Node current) {
-		int currentX = current.getX();
-		int currentY = current.getY();
-		int currentZ = current.getZ();
-
-		ArrayList<Node> possibleNeighbours = new ArrayList<Node>();
-		possibleNeighbours.add(new Node(currentZ, currentY, currentX + 1));
-		possibleNeighbours.add(new Node(currentZ, currentY, currentX - 1));
-		possibleNeighbours.add(new Node(currentZ, currentY + 1, currentX));
-		possibleNeighbours.add(new Node(currentZ, currentY - 1, currentX));
-		possibleNeighbours.add(new Node(currentZ + 1, currentY, currentX));
-		possibleNeighbours.add(new Node(currentZ - 1, currentY, currentX));
-
-		return possibleNeighbours;
-	}
-
-	private ArrayList<Node> possibleNeighboursChebyshev(Node current) {
-		int currentX = current.getX();
-		int currentY = current.getY();
-		int currentZ = current.getZ();
-
-		ArrayList<Node> possibleNeighbours = new ArrayList<Node>();
-		for (int z = currentZ - 1; z <= currentZ + 1; z++)
-			for (int y = currentY - 1; y <= currentY + 1; y++)
-				for (int x = currentX - 1; x <= currentX + 1; x++) {
-					if (!(x == currentX && y == currentY && z == currentZ))
-						possibleNeighbours.add(new Node(z, y, x));
-				}
-
-		return possibleNeighbours;
 	}
 
 	private ArrayList<Node> getNeighboursManhattan(Node currentNode) {
@@ -435,54 +192,6 @@ public class AStar {
 		}
 
 		return neighbours;
-	}
-
-	public Raster[][][] getMap() {
-		return map;
-	}
-
-	public void setMap(Raster[][][] map) {
-		this.map = map;
-	}
-
-	public int getSizeX() {
-		return sizeX;
-	}
-
-	public void setSizeX(int sizeX) {
-		this.sizeX = sizeX;
-	}
-
-	public int getSizeY() {
-		return sizeY;
-	}
-
-	public void setSizeY(int sizeY) {
-		this.sizeY = sizeY;
-	}
-
-	public int getSizeZ() {
-		return sizeZ;
-	}
-
-	public void setSizeZ(int sizeZ) {
-		this.sizeZ = sizeZ;
-	}
-
-	public Node getStartNode() {
-		return startNode;
-	}
-
-	public void setStartNode(Node startNode) {
-		this.startNode = startNode;
-	}
-
-	public Node getEndNode() {
-		return endNode;
-	}
-
-	public void setEndNode(Node endNode) {
-		this.endNode = endNode;
 	}
 
 }

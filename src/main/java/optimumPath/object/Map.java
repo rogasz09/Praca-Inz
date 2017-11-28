@@ -24,31 +24,46 @@ public class Map {
 	private Point3d startShift;
 	private Point3d endShift;
 	
-	private AStarPerform algProcessor;
+	private AlgorithmPerform algProcessor;
 	
 	private boolean isStart, isEnd;
 	private boolean isAnimation;
 	private volatile int speedAnimation = 5;
+	final int MAX_ANIM_SPEED = 105;
 	
 	private volatile FPSAnimator animator;
 	
 	
 	////////////////////////////////////
 	// watek dla algorytmu
-	public class AStarPerform implements Runnable {
+	public class AlgorithmPerform implements Runnable {
 		private volatile AStar algorithmAStar;
-		private boolean isChebyshev;
+		private volatile WavePropagation algorithmWP;
+		private boolean isChebyshev, isAStar;
 		private volatile boolean isFinish = false;
 		
-		public AStarPerform(AStar algorithmAStar, boolean isChebyshev) {
-		    this.algorithmAStar = algorithmAStar;
+		public AlgorithmPerform(boolean isAStar, boolean isChebyshev) {
+		    this.isAStar = isAStar;
 		    this.isChebyshev = isChebyshev;
+		}
+		
+		public void setAStar(AStar algorithmAStar) {
+			this.algorithmAStar = algorithmAStar;
+		}
+		
+		public void setWavePropagation(WavePropagation algorithmWP) {
+			this.algorithmWP = algorithmWP;
 		}
 		
 		@Override
 		public void run() {
-			algorithmAStar.perform(isChebyshev);
-			algorithmAStar.writePathToMap(rasterMap);
+			if (isAStar) {
+				algorithmAStar.perform(isChebyshev);
+				algorithmAStar.writePathToMap(rasterMap);
+			} else {
+				algorithmWP.perform(isChebyshev);
+				algorithmWP.writePathToMap(rasterMap);
+			}
 			isFinish = true;
 		}
 
@@ -230,11 +245,12 @@ public class Map {
 		//isAnimation = true;
 		
 		try {
-	        Thread.sleep(10*this.speedAnimation);
+	        Thread.sleep(10*(MAX_ANIM_SPEED-this.speedAnimation));
 	    }
 	    catch (Exception e){}
 		
 	}
+	
 	
 	public void makeShift(int x, int y, int z) {
 		double shiftX = (double)x * sizeRaster;
@@ -359,7 +375,21 @@ public class Map {
 		
 		AStar algorithmAStar = new AStar(this);
 		
-		algProcessor = new AStarPerform(algorithmAStar, isChebyshev);
+		algProcessor = new AlgorithmPerform(true, isChebyshev);
+		algProcessor.setAStar(algorithmAStar);
+		Thread algThread = new Thread(algProcessor);
+		algThread.start();
+		
+	}
+	
+	public void performWavePropagation(boolean isChebyshev) {
+		if(algProcessor != null)
+			return;
+		
+		WavePropagation algorithmWP = new WavePropagation(this);
+		
+		algProcessor = new AlgorithmPerform(false, isChebyshev);
+		algProcessor.setWavePropagation(algorithmWP);
 		Thread algThread = new Thread(algProcessor);
 		algThread.start();
 		
@@ -550,11 +580,11 @@ public class Map {
 		this.speedAnimation = speedAnimation;
 	}
 
-	public AStarPerform getAlgProcessor() {
+	public AlgorithmPerform getAlgProcessor() {
 		return algProcessor;
 	}
 
-	public void setAlgProcessor(AStarPerform algProcessor) {
+	public void setAlgProcessor(AlgorithmPerform algProcessor) {
 		this.algProcessor = algProcessor;
 	}
 
