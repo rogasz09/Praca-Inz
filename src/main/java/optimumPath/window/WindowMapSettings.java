@@ -3,6 +3,7 @@ package optimumPath.window;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -36,8 +37,11 @@ public class WindowMapSettings extends JDialog {
 	 * Create the dialog.
 	 */
 	public WindowMapSettings() {
+		
+		setResizable(false);
 		setTitle("Ustawienia Mapy");
 		setBounds(100, 100, 298, 301);
+		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

@@ -18,6 +18,7 @@ import optimumPath.common.Point3d;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
+import java.awt.Toolkit;
 
 public class WindowNewMap extends JDialog {
 	/**
@@ -43,6 +44,7 @@ public class WindowNewMap extends JDialog {
 		setResizable(false);
 		setTitle("Nowa mapa");
 		setBounds(100, 100, 280, 218);
+		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

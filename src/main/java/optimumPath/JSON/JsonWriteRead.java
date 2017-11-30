@@ -1,12 +1,16 @@
 package optimumPath.JSON;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import optimumPath.algorithms.Node;
 
 public class JsonWriteRead {
 
@@ -43,6 +47,32 @@ public class JsonWriteRead {
 			System.out.print("\n");
 		}
 
+	}
+	
+	public String nodeToString(Node node) {
+		String nodeString;
+		nodeString = "( " + Integer.toString(node.getX()) + " " +
+							Integer.toString(node.getY()) + " " +
+							Integer.toString(node.getZ()) + " )";
+		return nodeString;
+	}
+	
+	public void writePathToJSON(String pathFile, ArrayList<Node> path) {
+		JSONObject JSONPath = new JSONObject();
+		
+		JSONPath.put("path_length", path.size());
+		for(int i = 0; i < path.size(); i++) {
+			JSONPath.put(i, nodeToString(path.get(i)));
+		}
+		
+		try (FileWriter file = new FileWriter(pathFile)) {
+
+			file.write(JSONPath.toString());
+			file.flush();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean writeMapToJSON(String path,int outputMap[][][], int sizeZ, int sizeY, int sizeX) {

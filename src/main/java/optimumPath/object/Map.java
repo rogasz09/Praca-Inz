@@ -374,12 +374,14 @@ public class Map {
 	/////////////////////////////////////////
 	// WYKONANIE ALGORYTMOW
 	
-	public void performAStar(boolean isChebyshev) {
+	public void performAStar(boolean isChebyshev, int zoneProhibited, int thick) {
 		if(algProcessor != null)
 			return;
 		
 		AStar algorithmAStar = new AStar(this);
 		algorithm = algorithmAStar;
+		algorithm.setZoneProhibited(zoneProhibited);
+		algorithm.setThick(thick);
 		
 		algProcessor = new AlgorithmPerform(true, isChebyshev);
 		algProcessor.setAStar(algorithmAStar);
@@ -388,12 +390,14 @@ public class Map {
 		
 	}
 	
-	public void performWavePropagation(boolean isChebyshev) {
+	public void performWavePropagation(boolean isChebyshev, int zoneProhibited, int thick) {
 		if(algProcessor != null)
 			return;
 		
 		WavePropagation algorithmWP = new WavePropagation(this);
 		algorithm = algorithmWP;
+		algorithm.setZoneProhibited(zoneProhibited);
+		algorithm.setThick(thick);
 		
 		algProcessor = new AlgorithmPerform(false, isChebyshev);
 		algProcessor.setWavePropagation(algorithmWP);
@@ -627,7 +631,13 @@ public class Map {
 		this.lengthPath = lengthPath;
 	}
 
-	
+	public Algorithm getAlgorithm() {
+		return algorithm;
+	}
+
+	public void setAlgorithm(Algorithm algorithm) {
+		this.algorithm = algorithm;
+	}
 
 	/////////////////////////////////////////////
 	

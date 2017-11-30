@@ -67,9 +67,11 @@ import javax.swing.JRadioButtonMenuItem;
 import java.awt.FlowLayout;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.SystemColor;
 import javax.swing.SwingConstants;
+import java.awt.Toolkit;
 
 
 public class WindowMain extends JFrame {
@@ -105,7 +107,7 @@ public class WindowMain extends JFrame {
 	private ToolBarButton btnPasteLayer;
 	private JPanel panelSafe;
 	private JLabel label;
-	private JComboBox comboBox;
+	private JComboBox cbZoneProhibited;
 	private JCheckBox cboxAnimation;
 	private final ButtonGroup bgToolbarMenu = new ButtonGroup();
 	private final ButtonGroup bgPopupMenu = new ButtonGroup();
@@ -130,6 +132,10 @@ public class WindowMain extends JFrame {
 	private JLabel txtPathLeng;
 	private JLabel txtNumbRaster;
 	private JLabel txtIteration;
+	private JMenuItem mntmSavePath;
+	private ToolBarButton btnSavePath;
+	private JSpinner spnThick;
+	private ToolBarButton btnStopAlg, btnStartAlg;
 	
 	/**
 	 * G³ówna aplikacja.
@@ -137,6 +143,7 @@ public class WindowMain extends JFrame {
 	
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
+		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
 		setResizable(false);
 		setBounds(100, 100, 1041, 804);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -186,13 +193,16 @@ public class WindowMain extends JFrame {
 		mntmNewMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
 		mnFiles.add(mntmNewMap);
 		
+		mntmLoadMap = new JMenuItem("Wczytaj mape");
+		mntmLoadMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+		mnFiles.add(mntmLoadMap);
+		
 		mntmSaveMap = new JMenuItem("Zapisz mape");
 		mntmSaveMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
 		mnFiles.add(mntmSaveMap);
 		
-		mntmLoadMap = new JMenuItem("Wczytaj mape");
-		mntmLoadMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
-		mnFiles.add(mntmLoadMap);
+		mntmSavePath = new JMenuItem("Zapisz \u015Bcie\u017Ck\u0119");
+		mnFiles.add(mntmSavePath);
 		
 		separator_2 = new JSeparator();
 		mnFiles.add(separator_2);
@@ -386,11 +396,11 @@ public class WindowMain extends JFrame {
 		
 		label = new JLabel("Rodzaj strefy bezpiecze\u0144stwa:");
 		
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Brak", "Wok\u00F3\u0142 robota", "Wok\u00F3\u0142 przeszk\u00F3d"}));
+		cbZoneProhibited = new JComboBox();
+		cbZoneProhibited.setModel(new DefaultComboBoxModel(new String[] {"Brak", "Wok\u00F3\u0142 przeszk\u00F3d", "Wok\u00F3\u0142 robota"}));
 		
-		JSpinner spinner = new JSpinner();
-		spinner.setModel(new SpinnerNumberModel(0, 0, 3, 1));
+		spnThick = new JSpinner();
+		spnThick.setModel(new SpinnerNumberModel(1, 1, 2, 1));
 		
 		JLabel lblWielkoStrefy = new JLabel("Wielko\u015B\u0107 strefy:");
 		GroupLayout gl_panelSafe = new GroupLayout(panelSafe);
@@ -400,11 +410,11 @@ public class WindowMain extends JFrame {
 					.addContainerGap()
 					.addGroup(gl_panelSafe.createParallelGroup(Alignment.LEADING)
 						.addComponent(label, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
-						.addComponent(comboBox, 0, 207, Short.MAX_VALUE)
+						.addComponent(cbZoneProhibited, 0, 207, Short.MAX_VALUE)
 						.addGroup(gl_panelSafe.createSequentialGroup()
 							.addComponent(lblWielkoStrefy)
 							.addPreferredGap(ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
-							.addComponent(spinner, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)))
+							.addComponent(spnThick, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)))
 					.addContainerGap())
 		);
 		gl_panelSafe.setVerticalGroup(
@@ -413,11 +423,11 @@ public class WindowMain extends JFrame {
 					.addContainerGap()
 					.addComponent(label)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addComponent(cbZoneProhibited, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addGroup(gl_panelSafe.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblWielkoStrefy)
-						.addComponent(spinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(spnThick, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addContainerGap(103, Short.MAX_VALUE))
 		);
 		panelSafe.setLayout(gl_panelSafe);
@@ -585,9 +595,14 @@ public class WindowMain extends JFrame {
 		btnCopyLayer.setToolTipText("Kopiuj modyfikowan¹ warstwê");
 		btnPasteLayer = new ToolBarButton();
 		btnPasteLayer.setToolTipText("Wklej modyfikowan¹ warstwê");
-		
+		btnSavePath = new ToolBarButton();
+		btnSavePath.setToolTipText("Zapisz \u015Bcie\u017Ck\u0119");
 		btnSaveScreen = new ToolBarButton();
 		btnSaveScreen.setToolTipText("Zapisz widok");
+		btnStartAlg = new ToolBarButton();
+		btnStartAlg.setToolTipText("Wykonaj algorytm");
+		btnStopAlg = new ToolBarButton();
+		btnStopAlg.setToolTipText("Zatrzymaj algorytm");
 		btnHelp = new ToolBarButton();
 		btnHelp.setToolTipText("Pomoc");
 		btnExit = new ToolBarButton();
@@ -620,6 +635,10 @@ public class WindowMain extends JFrame {
 		btnCopyLayer.setIcon(new ImageIcon("toolbar_icons/copy.png"));
 		btnPasteLayer.setIcon(new ImageIcon("toolbar_icons/paste.png"));
 		
+		btnStartAlg.setIcon(new ImageIcon("toolbar_icons/perform.png"));
+		btnStopAlg.setIcon(new ImageIcon("toolbar_icons/stop.png"));
+		
+		btnSavePath.setIcon(new ImageIcon("toolbar_icons/path.png"));
 		btnSaveScreen.setIcon(new ImageIcon("toolbar_icons/camera.png"));
 		btnHelp.setIcon(new ImageIcon("toolbar_icons/help.png"));
 		btnExit.setIcon(new ImageIcon("toolbar_icons/exit.png"));
@@ -638,6 +657,10 @@ public class WindowMain extends JFrame {
 		toolBar.add(btnPasteLayer);
 		toolBar.addSeparator();
 		toolBar.add(btnSaveScreen);
+		toolBar.add(btnSavePath);
+		toolBar.addSeparator();
+		toolBar.add(btnStartAlg);
+		toolBar.add(btnStopAlg);
 		toolBar.addSeparator();
 		toolBar.add(btnHelp);
 		toolBar.add(btnExit);
@@ -799,6 +822,28 @@ public class WindowMain extends JFrame {
 			}
 		});
 		
+		btnSavePath.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int returnVal = fc.showSaveDialog(windowMain);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+			    	String filePath = fc.getSelectedFile().getPath();
+			    	//This is where a real application would open the file.
+			    	if (fc.getFileFilter().getDescription() == "JSON Files" && !filePath.endsWith(".JSON"))
+			    		filePath += ".JSON";
+			    	
+			    	if(!render.getRenderMap().getPathShift().isEmpty() && render.getRenderMap().getAlgorithm() != null) {
+			    		json.writePathToJSON(filePath, render.getRenderMap().getAlgorithm().getPath());
+			    		System.out.println("Saving: " + filePath);
+			    	} else
+			    		System.out.println("Œcie¿ka nie istnieje!");
+			
+				} else {
+			    	System.out.println("Save command cancelled by user.");
+			   	}
+			}
+		});
+		
 		btnCopyLayer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (!render.isMapCreation())
@@ -868,18 +913,22 @@ public class WindowMain extends JFrame {
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 				render.getRenderMap().resetPath();
 				boolean isChebyshev = false;
+				int zoneProhibited = cbZoneProhibited.getSelectedIndex();
+				int thick = ((Integer)spnThick.getValue()).intValue();
+				
 				if (cbMetrics.getSelectedIndex() == 1)
 					isChebyshev = true;
 				if (cbAlgorithm.getSelectedIndex() == 1) {
-					render.getRenderMap().performAStar(isChebyshev);
+					render.getRenderMap().performAStar(isChebyshev, zoneProhibited, thick);
 					render.setAStar(true);
 				} else {
-					render.getRenderMap().performWavePropagation(isChebyshev);
+					render.getRenderMap().performWavePropagation(isChebyshev, zoneProhibited, thick);
 					render.setAStar(false);
 				}
 			}
 		});
 		
+		btnStartAlg.addActionListener(btnApply.getActionListeners()[0]);
 		
 		sliderAnimSpeed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
@@ -948,7 +997,13 @@ public class WindowMain extends JFrame {
 		
 		mntmColorSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showColorChooser();
+				WindowColorSettings colorSettings = new WindowColorSettings(render.getMaterials());
+				
+				int loactionX = getX() + (getWidth() - colorSettings.getWidth())/2;
+				int loactionY = getY() + (getHeight() - colorSettings.getHeight())/2;
+				colorSettings.setLocation(loactionX, loactionY);
+				colorSettings.setModal(true);
+				colorSettings.setVisible(true);
 			}
 		});
 		
@@ -974,6 +1029,7 @@ public class WindowMain extends JFrame {
 		
 		mntmCopyLayer.addActionListener(btnCopyLayer.getActionListeners()[0]);
 		mntmPasteLayer.addActionListener(btnPasteLayer.getActionListeners()[0]);
+		mntmSavePath.addActionListener(btnSavePath.getActionListeners()[0]);
 
 		ActionListener GroupPopupListener = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -998,31 +1054,6 @@ public class WindowMain extends JFrame {
 		btnDelObst.addActionListener(GroupToolbarListener);
 		btnStart.addActionListener(GroupToolbarListener);
 		btnEnd.addActionListener(GroupToolbarListener);
-	}
-	
-	public Color showColorChooser() {
-		JColorChooser cc = new JColorChooser();
-        AbstractColorChooserPanel[] panels = cc.getChooserPanels();
-
-        JPanel p = new JPanel();
-        panels[3].setBorder( new TitledBorder(panels[3].getDisplayName()));
-        p.add(panels[3]);
-
-        JPanel gui = new JPanel(new BorderLayout(2,2));
-        gui.add(p, BorderLayout.CENTER);
-        gui.add(cc.getPreviewPanel(), BorderLayout.SOUTH);
-
-        JDialog colorRGB = new JDialog();
-        colorRGB.getContentPane().setLayout(new BorderLayout());
-        colorRGB.add(gui, BorderLayout.CENTER);
-        colorRGB.setBounds(100, 100, 650, 400);
-        colorRGB.setTitle("Wybór koloru");
-       
-        colorRGB.setResizable(false);
-        colorRGB.setModal(true);
-        colorRGB.setVisible(true);
-        
-		return cc.getColor();
 	}
 
 	public JPanel getGLpanel() {

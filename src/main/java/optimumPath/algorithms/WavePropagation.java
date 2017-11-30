@@ -54,23 +54,11 @@ public class WavePropagation extends Algorithm{
 		}
 	}
 	
-	private ArrayList<Node> copyListNode(ArrayList<Node> list) {
-		ArrayList<Node> copyList = new ArrayList<Node>();
-		for (int i = 0; i < list.size(); i++) {
-			Node tmpNode = list.get(i);
-			Node newNode = new Node(tmpNode.getZ(), tmpNode.getY(), tmpNode.getX(), tmpNode.getType());
-			newNode.setF(tmpNode.getF());
-			copyList.add(newNode);
-		}
-		
-		return copyList;
-	}
-	
 	/////////////////////////////////////////////////////
 	//	GLOWNY ALGORYTM PROPAGACJI FALI
 	
 	public void perform(boolean isChebyshev) {
-		if(!checkSatartEnd())
+		if(!checkBeforePerform())
 			return;
 		
 		ArrayList<Node> freeRasters = getFreeRasterList();
@@ -163,11 +151,13 @@ public class WavePropagation extends Algorithm{
 				int index = getNodeFromList(neighbours.get(i), processedNodes);
 				if (index != -1) {
 					if (processedNodes.get(index).getF() == lastNodePath.getF()-1) {
-						if (checkPossibleTransition(lastNodePath, processedNodes.get(index))) {
-							getPath().add(processedNodes.get(index));
-							lastNodePath = getPath().get(getPath().size() - 1);
-							break;
-						}
+						//if (checkNodeForbiddenRobot(processedNodes.get(index), getThick())) {
+							if (checkPossibleTransition(lastNodePath, processedNodes.get(index))) {
+								getPath().add(processedNodes.get(index));
+								lastNodePath = getPath().get(getPath().size() - 1);
+								break;
+							}
+					
 					}
 				}
 			}
@@ -175,9 +165,7 @@ public class WavePropagation extends Algorithm{
 
 		lengthPath = node.getF();
 		numberRasterPath = getPath().size();
-		
-		getPath().remove(0);
-		getPath().remove(getPath().size() - 1);
+		printList(getPath());
 	}
 	
 	////////////////////////////////////////////////////////

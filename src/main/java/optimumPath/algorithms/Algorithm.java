@@ -17,6 +17,9 @@ public class Algorithm {
 	private Node endNode;
 
 	private ArrayList<Node> path;
+	
+	private int zoneProhibited;
+	private int thick;
 	protected Map renderMap;
 	
 	protected int numberIteration;
@@ -98,7 +101,7 @@ public class Algorithm {
 	}
 
 	// wypisuje w konsoli liste Nodow
-	public void printList(ArrayList<Node> list) {
+	public static void printList(ArrayList<Node> list) {
 		System.out.print("List: ");
 		for (int i = 0; i < list.size(); i++) {
 			printNode(list.get(i));
@@ -107,7 +110,7 @@ public class Algorithm {
 	}
 
 	// wypisuje w konsoli Node
-	public void printNode(Node node) {
+	public static void printNode(Node node) {
 		System.out.print("( ");
 		System.out.print(Integer.toString(node.getX()) + " ");
 		System.out.print(Integer.toString(node.getY()) + " ");
@@ -116,11 +119,12 @@ public class Algorithm {
 	}
 	/*****************************************************/
 	
-	
+	//komunikaty problemu
 	public static void issueInfoBox(String infoMessage, String issueTitle) {
         JOptionPane.showMessageDialog(null, infoMessage, "Problem: " + issueTitle, JOptionPane.INFORMATION_MESSAGE);
     }
 	
+	//spradzanie czy na mapie znajdujê siê punkt startowy i koñcowy
 	public boolean checkSatartEnd() {
 		if (!renderMap.isStart() && !renderMap.isEnd()) {
 			issueInfoBox("Na mapie nie zaznaczono punktu startowego i koñcowego", "brak punktu start i koniec");
@@ -137,20 +141,123 @@ public class Algorithm {
 		return true;
 	}
 	
+	//komunikat o braku  œcie¿ki
 	public void noPath() {
 		issueInfoBox("Algorytm nie znalaz³ scie¿ki", "brak œcie¿ki");
+	}
+	
+	//komunikat o wystêpowaniu punktu startowego lub koñcowego w rastrze zabronionym
+	public void startEndInForbidden() {
+		issueInfoBox("Punkt stratowy lub koñcowy znajdujê siê w rastrach zabronionych", "zabroniony punkt start lub koniec");
 	}
 	
 	// zapisuje sciezke do mapy rastrow
 	public void writePathToMap(Raster[][][] rasterMap) {
 		if (path == null)
 			return;
+		
+		ArrayList<Node> copyPath = copyListNode(path);
+		copyPath.remove(0);
+		copyPath.remove(copyPath.size() - 1);
 
-		for (int i = 0; i < path.size(); i++) {
-			Node currentNode = path.get(i);
+		for (int i = 0; i < copyPath.size(); i++) {
+			Node currentNode = copyPath.get(i);
 			rasterMap[currentNode.getZ()][currentNode.getY()][currentNode.getX()] = Raster.PATH;
 		}
 	}
+	
+	public boolean isStartEndInForbidden() {
+		if (map[startNode.getZ()][startNode.getY()][startNode.getY()] == Raster.FORBIDDEN)
+			return true;
+		if (map[endNode.getZ()][endNode.getY()][endNode.getY()] == Raster.FORBIDDEN)
+			return true;
+		
+		return false;
+	}
+	
+	public void writeCopyToMain() {
+		for (int z = 0; z < sizeZ; z++) {
+			for (int y = 0; y < sizeY; y++) {
+				for (int x = 0; x < sizeX; x++) {
+					renderMap.getRasterMap()[z][y][x] = map[z][y][x];
+				}
+			}
+		}
+	}
+	
+	protected void createForbidden() {
+		for (int z = 0; z < sizeZ; z++) {
+			for (int y = 0; y < sizeY; y++) {
+				for (int x = 0; x < sizeX; x++) {
+					maskForbidden(z, y, x, thick);
+				}
+			}
+		}
+	}
+	
+	protected void maskForbidden(int cz, int cy, int cx, int thick) {
+		for (int z = cz - thick; z <= cz + thick; z++)
+			for (int y = cy - thick; y <= cy + thick; y++)
+				for (int x = cx - thick; x <= cx + thick; x++) {
+					if (!(x == cx && y == cy && z == cz)) {
+						if (map[cz][cy][cx] == Raster.OBSTACLE) {
+							if (isInMap(z, y, x)) {
+								if (map[z][y][x] != Raster.OBSTACLE && map[z][y][x] != Raster.FORBIDDEN) {
+									map[z][y][x] = Raster.FORBIDDEN;
+								}
+							}
+						}
+					}	
+				}
+	}
+	
+	protected boolean checkNodeForbiddenRobot(Node currentNode, int thick) {
+		if (zoneProhibited != 2)
+			return true;
+		
+		int cx = currentNode.getX();
+		int cy = currentNode.getY();
+		int cz = currentNode.getZ();
+		
+		for (int z = cz - thick; z <= cz + thick; z++)
+			for (int y = cy - thick; y <= cy + thick; y++)
+				for (int x = cx - thick; x <= cx + thick; x++) {
+					if (!(x == cx && y == cy && z == cz)) {
+						if (isInMap(z, y, x)) {
+							if (map[z][y][x] == Raster.OBSTACLE)
+								return false;
+						}
+					}	
+				}
+		return true;
+	}
+	
+	public boolean checkBeforePerform() {
+		if(!checkSatartEnd())
+			return false;
+		
+		if (zoneProhibited == 1) {
+			createForbidden();
+			if (isStartEndInForbidden()) {
+				startEndInForbidden();
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	protected boolean isInMap(int z, int y, int x) {
+		if (z < sizeZ && z >= 0) {
+			if (y < sizeY && y >= 0) {
+				if (x < sizeX && x >= 0) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/*****************************************************/
 	
 	
@@ -188,6 +295,19 @@ public class Algorithm {
 					return true;
 
 		return false;
+	}
+	
+	//kopiowanie listy Node
+	protected ArrayList<Node> copyListNode(ArrayList<Node> list) {
+		ArrayList<Node> copyList = new ArrayList<Node>();
+		for (int i = 0; i < list.size(); i++) {
+			Node tmpNode = list.get(i);
+			Node newNode = new Node(tmpNode.getZ(), tmpNode.getY(), tmpNode.getX(), tmpNode.getType());
+			newNode.setF(tmpNode.getF());
+			copyList.add(newNode);
+		}
+		
+		return copyList;
 	}
 	/*****************************************************/
 
@@ -407,6 +527,22 @@ public class Algorithm {
 
 	public void setLengthPath(double lengthPath) {
 		this.lengthPath = lengthPath;
+	}
+
+	public int getZoneProhibited() {
+		return zoneProhibited;
+	}
+
+	public void setZoneProhibited(int zoneProhibited) {
+		this.zoneProhibited = zoneProhibited;
+	}
+
+	public int getThick() {
+		return thick;
+	}
+
+	public void setThick(int thick) {
+		this.thick = thick;
 	}
 	
 	//////////////////////////////////////////////

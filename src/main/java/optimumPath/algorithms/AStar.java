@@ -1,6 +1,7 @@
 package optimumPath.algorithms;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import optimumPath.common.*;
 import optimumPath.object.*;
@@ -17,7 +18,7 @@ public class AStar extends Algorithm {
 	}
 
 	public void perform(boolean isChebyshev) {
-		if(!checkSatartEnd())
+		if(!checkBeforePerform())
 			return;
 		
 		ArrayList<Node> closedset = new ArrayList<Node>();
@@ -67,8 +68,12 @@ public class AStar extends Algorithm {
 			for (int i = 0; i < neighbours.size(); i++) {
 				if (isInSet(neighbours.get(i), closedset))
 					continue;
-
+				if (!checkNodeForbiddenRobot(neighbours.get(i), getThick()))
+					continue;
+				
 				Node neighbour = neighbours.get(i);
+				
+				
 				if (isChebyshev) {
 					g = actualNode.getG() + getChebyshevCost(actualNode,neighbour);
 				} else {
@@ -130,9 +135,9 @@ public class AStar extends Algorithm {
 		
 		lengthPath = endNode.getG();
 		numberRasterPath = getPath().size();
-
-		this.getPath().remove(0);
-		this.getPath().remove(getPath().size() - 1);
+		Collections.reverse(getPath());
+		
+		printList(getPath());
 	}
 
 

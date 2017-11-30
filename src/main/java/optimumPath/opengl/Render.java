@@ -38,6 +38,7 @@ public class Render implements GLEventListener {
 	private Map renderMap;
 	private MapEdition editionMap;
 	private Camera camera;
+	private MaterialsList materials;
 	private GLU glu;
 	final private GLCanvas glcanvas;
 	private ByteBuffer buffer;
@@ -57,7 +58,8 @@ public class Render implements GLEventListener {
 
 		this.camera = new Camera(); // Kamera dla glcanvas
 		this.renderMap = new Map(); // Mapa zawierj¹ca informacje o przeszkodach œcie¿ce itp.
-		this.editionMap = new MapEdition();
+		this.editionMap = new MapEdition(); //Obiekt zawieraj¹cy metody do modyfikacji mapy np. odczyt wspolrzednych mapy
+		this.materials = new MaterialsList();
 		this.glcanvas = new GLCanvas(capabilities); // canvas
 		this.glu = new GLU(); // glu
 
@@ -114,7 +116,8 @@ public class Render implements GLEventListener {
 				renderMap.resultAlgorithm();
 				window.getResults();
 			}
-
+		
+		materials.setGLBackground(gl);
 		//gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 
@@ -142,7 +145,7 @@ public class Render implements GLEventListener {
 
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glShadeModel(GL2.GL_SMOOTH);
-		gl.glClearColor(0.95f, 0.95f, 0.95f, 0.0f);
+		materials.setGLBackground(gl);
 		gl.glClearDepth(1.0f);
 		// przezroczystosc
 		gl.glEnable(GL2.GL_BLEND);
@@ -151,9 +154,9 @@ public class Render implements GLEventListener {
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LESS);
 		//gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
-		// gl.glEnable (GL2.GL_COLOR_MATERIAL);
-		// gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
-		// gl.glMaterialf(GL2.GL_SHININESS, 100.0);
+		//gl.glEnable (GL2.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
+		gl.glMaterialf(GL2.GL_FRONT, GL2.GL_SHININESS, 100.0f);
 
 		// definicja œwiat³a
 		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -193,19 +196,13 @@ public class Render implements GLEventListener {
 	///////////////////////////////////////////////////
 	// rysowanie podstawy
 	public void drawBase(GL2 gl) {
-
-		
-		float mat_diffuse[] = { 0.6f, 0.5f, 0.8f, 1.0f };
-		float mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
-		float mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float halfSizeRaster = (float) renderMap.getSizeRaster() / 2;
-
+		
+		materials.getMatBase().setGLMaterial(gl);
+		
 		gl.glPushMatrix();
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_ambient_color, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
 		gl.glBegin(GL2.GL_QUADS);
-
+		
 		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster, -halfSizeRaster);
 		gl.glVertex3f(-halfSizeRaster, -halfSizeRaster,
 				(float) renderMap.getSizeRaster() * (float) renderMap.getSizeY() - halfSizeRaster);
@@ -223,12 +220,12 @@ public class Render implements GLEventListener {
 	// rysowanie siatki
 	public void drawGrid(GL2 gl, int layer) {
 
-		float mat_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float halfSizeRaster = (float) renderMap.getSizeRaster() / 2;
 		float offset = (float) layer * (float) renderMap.getSizeRaster();
 
+		materials.getMatGrid().setGLMaterial(gl);
+		
 		gl.glPushMatrix();
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
 
 		for (int i = 0; i < renderMap.getSizeX() + 1; i++) {
 			gl.glBegin(GL2.GL_LINES);
@@ -260,30 +257,17 @@ public class Render implements GLEventListener {
 	public void drawObsticles(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float no_mat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		float mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
-		float mat_diffuse[] = { 0.1f, 0.5f, 0.8f, 0.85f }; // kolor, ostatni parametr okresla przezroczystosc
-		float mat_diffuse_modification[] = { 0.5f, 0.1f, 0.8f, 0.5f }; // kolor, ostatni parametr okresla
-																		// przezroczystosc
-		float mat_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float low_shininess[] = { 5.0f };
-
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_ambient_color, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, mat_specular, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, low_shininess, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, no_mat, 0);
-
+		materials.getMatObstacle().setGLMaterial(gl);
 		for (int index = 0; index < renderMap.getObstacleShift().size(); index++) {
-
-			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+			materials.getMatObstacle().setGLDiffuse(gl);
 			// kostka o okreœlonym materiale
 			Point3d translate = renderMap.getObstacleShift().get(index);
 			Point3d raster = renderMap.pointFromShift(renderMap.getObstacleShift(), index);
 			if (this.isMapCreation && (int) raster.getZ() > offsetLayer)
 				continue;
 			if (this.isMapCreation && (int) raster.getZ() == offsetLayer)
-				gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse_modification, 0);
-
+				materials.getMatObstacleMod().setGLDiffuse(gl);
+				
 			gl.glPushMatrix();
 			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
 
@@ -297,11 +281,8 @@ public class Render implements GLEventListener {
 	public void drawStratEnd(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse1[] = { 1.0f, 0.8f, 0.1f, 1.0f };
-		float mat_diffuse2[] = { 1.0f, 0.2f, 0.1f, 1.0f };
-
 		if (renderMap.isStart()) {
-			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse1, 0);
+			materials.getMatStart().setGLDiffuse(gl);
 			Point3d translate = renderMap.getStartShift();
 			Point3d raster = renderMap.pointFromShift(renderMap.getStartShift());
 			if (!(this.isMapCreation && (int) raster.getZ() > offsetLayer)) {
@@ -313,7 +294,7 @@ public class Render implements GLEventListener {
 		}
 
 		if (renderMap.isEnd()) {
-			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse2, 0);
+			materials.getMatEnd().setGLDiffuse(gl);
 			Point3d translate = renderMap.getEndShift();
 			Point3d raster = renderMap.pointFromShift(renderMap.getEndShift());
 			if (!(this.isMapCreation && (int) raster.getZ() > offsetLayer)) {
@@ -331,9 +312,7 @@ public class Render implements GLEventListener {
 	public void drawPath(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.6f, 0.0f, 0.0f, 0.9f }; // kolor, ostatni parametr okresla przezroczystosc
-
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+		materials.getMatPath().setGLDiffuse(gl);
 
 		for (int index = 0; index < renderMap.getPathShift().size(); index++) {
 			// kostka o okreœlonym materiale
@@ -354,9 +333,7 @@ public class Render implements GLEventListener {
 	public void drawClosed(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.1f, 0.1f, 0.1f, 0.5f }; // kolor, ostatni parametr okresla przezroczystosc
-
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+		materials.getMatClosed().setGLDiffuse(gl);
 
 		for (int index = 0; index < renderMap.getClosedShift().size(); index++) {
 			// kostka o okreœlonym materiale
@@ -374,9 +351,7 @@ public class Render implements GLEventListener {
 	public void drawOpen(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.9f, 0.9f, 0.9f, 0.4f }; // kolor, ostatni parametr okresla przezroczystosc
-
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+		materials.getMatOpen().setGLDiffuse(gl);
 
 		for (int index = 0; index < renderMap.getOpenShift().size(); index++) {
 			// kostka o okreœlonym materiale
@@ -394,17 +369,15 @@ public class Render implements GLEventListener {
 	public void drawActual(GL2 gl) {
 		GLUT glut = new GLUT();
 
-		float mat_diffuse[] = { 0.1f, 0.7f, 0.1f, 0.6f }; // kolor, ostatni parametr okresla przezroczystosc
+		materials.getMatActual().setGLDiffuse(gl);
 
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, mat_diffuse, 0);
+		// kostka o okreœlonym materiale
+		Point3d translate = renderMap.getActualShift();
 
-			// kostka o okreœlonym materiale
-			Point3d translate = renderMap.getActualShift();
-
-			gl.glPushMatrix();
-			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
-			glut.glutSolidCube((float) renderMap.getSizeRaster());
-			gl.glPopMatrix();
+		gl.glPushMatrix();
+		gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
+		glut.glutSolidCube((float) renderMap.getSizeRaster());
+		gl.glPopMatrix();
 		
 	}
 
@@ -514,8 +487,14 @@ public class Render implements GLEventListener {
 	public void setWindow(WindowMain window) {
 		this.window = window;
 	}
-	
-	
+
+	public MaterialsList getMaterials() {
+		return materials;
+	}
+
+	public void setMaterials(MaterialsList materials) {
+		this.materials = materials;
+	}
 	
 	//////////////////
 
