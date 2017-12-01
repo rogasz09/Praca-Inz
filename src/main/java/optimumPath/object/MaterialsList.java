@@ -63,7 +63,7 @@ public class MaterialsList {
 		
 		//forbidden
 		matForbidden.setAmbient(0.0f, 0.0f, 0.0f, 1.0f);
-		matForbidden.setDiffuse(0.1f, 0.5f, 0.8f, 0.3f);
+		matForbidden.setDiffuse(0.1f, 0.7f, 0.8f, 0.5f);
 		matForbidden.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 		matForbidden.setShininess(5.0f);
 		

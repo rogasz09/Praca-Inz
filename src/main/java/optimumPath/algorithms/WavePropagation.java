@@ -79,7 +79,7 @@ public class WavePropagation extends Algorithm{
 		boolean isPath = false;
 		int iteration = 1;
 		
-		while (!actualNodes.isEmpty()) {
+		while (!actualNodes.isEmpty() && !stopAlgorithm) {
 			prevNodes = copyListNode(actualNodes);
 			actualNodes.clear();
 			
@@ -93,11 +93,12 @@ public class WavePropagation extends Algorithm{
 				
 				for (int n = 0; n < neighbours.size(); n++) {
 					if (isInSet(neighbours.get(n), freeRasters)) {
-						if (checkPossibleTransition(prevNodes.get(i), neighbours.get(n))) {
-							neighbours.get(n).setF(iteration);
-							removeNodeFromList(neighbours.get(n), freeRasters);
-							actualNodes.add(neighbours.get(n));
-							
+						if (maskForbiddenRobot(neighbours.get(n), true)) {
+							if (checkPossibleTransition(prevNodes.get(i), neighbours.get(n))) {
+								neighbours.get(n).setF(iteration);
+								removeNodeFromList(neighbours.get(n), freeRasters);
+								actualNodes.add(neighbours.get(n));
+							}
 						}
 					}
 				}
@@ -123,6 +124,13 @@ public class WavePropagation extends Algorithm{
 		}
 		
 		numberIteration = iteration;
+		
+		if (stopAlgorithm) {
+			stopAlgorithm = false;
+			infoStopAlg();
+			return;
+		}
+		writeCopyToMain();
 		
 		if (!isPath) {
 			noPath();
@@ -151,13 +159,11 @@ public class WavePropagation extends Algorithm{
 				int index = getNodeFromList(neighbours.get(i), processedNodes);
 				if (index != -1) {
 					if (processedNodes.get(index).getF() == lastNodePath.getF()-1) {
-						//if (checkNodeForbiddenRobot(processedNodes.get(index), getThick())) {
-							if (checkPossibleTransition(lastNodePath, processedNodes.get(index))) {
-								getPath().add(processedNodes.get(index));
-								lastNodePath = getPath().get(getPath().size() - 1);
-								break;
-							}
-					
+						if (checkPossibleTransition(lastNodePath, processedNodes.get(index))) {
+							getPath().add(processedNodes.get(index));
+							lastNodePath = getPath().get(getPath().size() - 1);
+							break;
+						}
 					}
 				}
 			}

@@ -10,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -101,14 +103,16 @@ public class Render implements GLEventListener {
 
 		drawObsticles(gl);
 		drawStratEnd(gl);
-		drawPath(gl);
+		drawList(gl, renderMap.getPathShift(), materials.getMatPath());
+		drawList(gl, renderMap.getForbiddenShift(), materials.getMatForbidden());
 		
 		if (renderMap.isAnimation()) {
 			if (isAStar)
 				drawActual(gl);
 			
-			drawClosed(gl);
-			drawOpen(gl);
+			drawList(gl, renderMap.getClosedShift(), materials.getMatClosed());
+			drawList(gl, renderMap.getOpenShift(), materials.getMatOpen());
+			
 		}
 		
 		if (renderMap.getAlgProcessor() != null)
@@ -306,56 +310,15 @@ public class Render implements GLEventListener {
 		}
 
 	}
-
-	////////////////////////
-	// rysowanie œcie¿ki
-	public void drawPath(GL2 gl) {
-		GLUT glut = new GLUT();
-
-		materials.getMatPath().setGLDiffuse(gl);
-
-		for (int index = 0; index < renderMap.getPathShift().size(); index++) {
-			// kostka o okreœlonym materiale
-			Point3d translate = renderMap.getPathShift().get(index);
-
-			gl.glPushMatrix();
-			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
-			glut.glutSolidCube((float) renderMap.getSizeRaster());
-			gl.glPopMatrix();
-		}
-	}
-
-	///////////////////////////////////////////////
-	/// Algorytm AStar
 	
-	////////////////////////
-	// rysowanie zamkniete
-	public void drawClosed(GL2 gl) {
+	public void drawList(GL2 gl, List<Point3d> listShift, Material material) {
 		GLUT glut = new GLUT();
 
-		materials.getMatClosed().setGLDiffuse(gl);
+		material.setGLDiffuse(gl);
 
-		for (int index = 0; index < renderMap.getClosedShift().size(); index++) {
+		for (int index = 0; index < listShift.size(); index++) {
 			// kostka o okreœlonym materiale
-			Point3d translate = renderMap.getClosedShift().get(index);
-
-			gl.glPushMatrix();
-			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());
-			glut.glutSolidCube((float) renderMap.getSizeRaster());
-			gl.glPopMatrix();
-		}
-	}
-
-	////////////////////////
-	// rysowanie otwarte
-	public void drawOpen(GL2 gl) {
-		GLUT glut = new GLUT();
-
-		materials.getMatOpen().setGLDiffuse(gl);
-
-		for (int index = 0; index < renderMap.getOpenShift().size(); index++) {
-			// kostka o okreœlonym materiale
-			Point3d translate = renderMap.getOpenShift().get(index);
+			Point3d translate = listShift.get(index);
 
 			gl.glPushMatrix();
 			gl.glTranslatef((float) translate.getX(), (float) translate.getY(), (float) translate.getZ());

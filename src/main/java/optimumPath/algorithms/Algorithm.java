@@ -25,6 +25,8 @@ public class Algorithm {
 	protected int numberIteration;
 	protected int numberRasterPath;
 	protected double lengthPath;
+	
+	protected boolean stopAlgorithm = false;
 
 	public Algorithm(Map inputMap) {
 		initMap(inputMap);
@@ -151,6 +153,11 @@ public class Algorithm {
 		issueInfoBox("Punkt stratowy lub koñcowy znajdujê siê w rastrach zabronionych", "zabroniony punkt start lub koniec");
 	}
 	
+	//komunikat o zatrzymaniu algorytmu
+	public void infoStopAlg() {
+		issueInfoBox("Algorytm zosta³ zatrzymany", "stop");
+	}
+	
 	// zapisuje sciezke do mapy rastrow
 	public void writePathToMap(Raster[][][] rasterMap) {
 		if (path == null)
@@ -189,13 +196,13 @@ public class Algorithm {
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
 				for (int x = 0; x < sizeX; x++) {
-					maskForbidden(z, y, x, thick);
+					maskForbidden(z, y, x);
 				}
 			}
 		}
 	}
 	
-	protected void maskForbidden(int cz, int cy, int cx, int thick) {
+	protected void maskForbidden(int cz, int cy, int cx) {
 		for (int z = cz - thick; z <= cz + thick; z++)
 			for (int y = cy - thick; y <= cy + thick; y++)
 				for (int x = cx - thick; x <= cx + thick; x++) {
@@ -211,7 +218,7 @@ public class Algorithm {
 				}
 	}
 	
-	protected boolean checkNodeForbiddenRobot(Node currentNode, int thick) {
+	protected boolean maskForbiddenRobot(Node currentNode, boolean meakeForbidden) {
 		if (zoneProhibited != 2)
 			return true;
 		
@@ -219,17 +226,32 @@ public class Algorithm {
 		int cy = currentNode.getY();
 		int cz = currentNode.getZ();
 		
+		boolean isForbidden = true;
 		for (int z = cz - thick; z <= cz + thick; z++)
 			for (int y = cy - thick; y <= cy + thick; y++)
 				for (int x = cx - thick; x <= cx + thick; x++) {
 					if (!(x == cx && y == cy && z == cz)) {
 						if (isInMap(z, y, x)) {
-							if (map[z][y][x] == Raster.OBSTACLE)
-								return false;
+							if (map[z][y][x] == Raster.OBSTACLE) {
+								if (meakeForbidden)
+									map[cz][cy][cx] = Raster.FORBIDDEN;
+								isForbidden = false;
+							}
 						}
 					}	
 				}
-		return true;
+		return isForbidden;
+	}
+	
+	protected void checkNieghboursForbidden(ArrayList<Node> list) {
+		if (zoneProhibited != 2)
+			return;
+					
+		for (int i = 0; i < list.size(); i++) {
+			Node neighbour = list.get(i);
+			if (isInMap(neighbour.getZ(), neighbour.getY(), neighbour.getX()))
+				maskForbiddenRobot(neighbour, true);
+		}
 	}
 	
 	public boolean checkBeforePerform() {
@@ -239,6 +261,14 @@ public class Algorithm {
 		if (zoneProhibited == 1) {
 			createForbidden();
 			if (isStartEndInForbidden()) {
+				startEndInForbidden();
+				return false;
+			}
+			writeCopyToMain();
+			renderMap.makeShiftList();
+		}
+		if (zoneProhibited == 2) {
+			if (!maskForbiddenRobot(startNode, false) || !maskForbiddenRobot(endNode, false)) {
 				startEndInForbidden();
 				return false;
 			}
@@ -411,6 +441,7 @@ public class Algorithm {
 						possibleNeighbours.add(new Node(z, y, x));
 				}
 
+		checkNieghboursForbidden(possibleNeighbours);
 		return possibleNeighbours;
 	}
 	/*****************************************************/
@@ -435,6 +466,7 @@ public class Algorithm {
 		possibleNeighbours.add(new Node(currentZ + 1, currentY, currentX));
 		possibleNeighbours.add(new Node(currentZ - 1, currentY, currentX));
 
+		checkNieghboursForbidden(possibleNeighbours);
 		return possibleNeighbours;
 	}
 	/*****************************************************/
@@ -544,6 +576,16 @@ public class Algorithm {
 	public void setThick(int thick) {
 		this.thick = thick;
 	}
+
+	public boolean isStopAlgorithm() {
+		return stopAlgorithm;
+	}
+
+	public void setStopAlgorithm(boolean stopAlgorithm) {
+		this.stopAlgorithm = stopAlgorithm;
+	}
+	
+	
 	
 	//////////////////////////////////////////////
 }

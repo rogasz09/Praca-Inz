@@ -15,6 +15,7 @@ public class Map {
 	private double sizeRaster;
 	
 	private List<Point3d> obstacleShift;
+	private List<Point3d> forbiddenShift;
 	private List<Point3d> pathShift;
 	
 	private List<Point3d> openShift;
@@ -87,7 +88,9 @@ public class Map {
 		sizeRaster = 1.0;
 		
 		obstacleShift = new ArrayList<Point3d>();
+		forbiddenShift = new ArrayList<Point3d>();
 		pathShift = new ArrayList<Point3d>();
+		
 		startShift = new Point3d();
 		endShift = new Point3d();
 		
@@ -105,6 +108,7 @@ public class Map {
 		this.sizeRaster = sizeRaster;
 		
 		obstacleShift = new ArrayList<Point3d>();
+		forbiddenShift = new ArrayList<Point3d>();
 		pathShift = new ArrayList<Point3d>();
 		startShift = new Point3d();
 		endShift = new Point3d();
@@ -130,6 +134,7 @@ public class Map {
 		clearArray(rasterMap, sizeX, sizeY, sizeZ);
 		
 		obstacleShift.clear();
+		forbiddenShift.clear();
 		pathShift.clear();
 		
 		openShift.clear();
@@ -142,6 +147,7 @@ public class Map {
 	public void makeShiftList() {
 		// ustawienie przesuniêæ dla mapy
 		obstacleShift.clear();
+		forbiddenShift.clear();
 		pathShift.clear();
 		
 		isStart = false;
@@ -267,6 +273,10 @@ public class Map {
 				obstacleShift.add(new Point3d(shiftX, shiftY, shiftZ));
 				break;
 				
+			case FORBIDDEN:
+				forbiddenShift.add(new Point3d(shiftX, shiftY, shiftZ));
+				break;
+				
 			case PATH:
 				pathShift.add(new Point3d(shiftX, shiftY, shiftZ));
 				break;
@@ -346,6 +356,9 @@ public class Map {
 			case OBSTACLE:
 				removeFromlist(obstacleShift, x, y, z);
 				break;
+			case FORBIDDEN:
+				removeFromlist(forbiddenShift, x, y, z);
+				break;
 			case PATH:
 				removeFromlist(pathShift, x, y, z);
 				break;
@@ -368,6 +381,15 @@ public class Map {
 		}
 		
 		pathShift.clear();
+	}
+	
+	public void resetForbidden() {
+		for(int i = 0; i < forbiddenShift.size(); i++) {
+			Point3d raster = this.pointFromShift(forbiddenShift.get(i));
+			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
+		}
+		
+		forbiddenShift.clear();
 	}
 	
 	
@@ -467,6 +489,14 @@ public class Map {
 	
 	public Point3d getStartShift() {
 		return startShift;
+	}
+
+	public List<Point3d> getForbiddenShift() {
+		return forbiddenShift;
+	}
+
+	public void setForbiddenShift(List<Point3d> forbiddenShift) {
+		this.forbiddenShift = forbiddenShift;
 	}
 
 	public List<Point3d> getOpenShift() {

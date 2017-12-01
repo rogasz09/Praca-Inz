@@ -44,7 +44,7 @@ public class AStar extends Algorithm {
 
 		numberIteration = 0;
 		
-		while (!openset.isEmpty()) {
+		while (!openset.isEmpty() && !stopAlgorithm) {
 			numberIteration += 1;
 			
 			x = getLowestFCostIndex(openset);
@@ -68,8 +68,8 @@ public class AStar extends Algorithm {
 			for (int i = 0; i < neighbours.size(); i++) {
 				if (isInSet(neighbours.get(i), closedset))
 					continue;
-				if (!checkNodeForbiddenRobot(neighbours.get(i), getThick()))
-					continue;
+				//if (!checkNodeForbiddenRobot(neighbours.get(i), getThick()))
+					//continue;
 				
 				Node neighbour = neighbours.get(i);
 				
@@ -110,6 +110,13 @@ public class AStar extends Algorithm {
 				renderMap.stepAstar(openset, closedset, actualNode);
 			}
 		}
+		
+		if (stopAlgorithm) {
+			stopAlgorithm = false;
+			infoStopAlg();
+			return;
+		}
+		writeCopyToMain();
 
 		if (!isPath) {
 			noPath();
@@ -117,6 +124,8 @@ public class AStar extends Algorithm {
 			System.out.println("Znaleziono œcie¿kê");
 			reconstructPath(openset.get(x));
 		}
+		
+		
 	}
 
 	private void reconstructPath(Node endNode) {

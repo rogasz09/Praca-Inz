@@ -884,6 +884,7 @@ public class WindowMain extends JFrame {
 				spnLayer.setEnabled(true);
 				render.setMapCreation(true);
 				render.getRenderMap().resetPath();
+				render.getRenderMap().resetForbidden();
 				if (!render.getCamera().isPrevCamera())
 					render.getCamera().saveActualCamera();
 				
@@ -912,6 +913,7 @@ public class WindowMain extends JFrame {
 				render.setAnimation(cboxAnimation.isSelected());
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 				render.getRenderMap().resetPath();
+				render.getRenderMap().resetForbidden();
 				boolean isChebyshev = false;
 				int zoneProhibited = cbZoneProhibited.getSelectedIndex();
 				int thick = ((Integer)spnThick.getValue()).intValue();
@@ -929,6 +931,12 @@ public class WindowMain extends JFrame {
 		});
 		
 		btnStartAlg.addActionListener(btnApply.getActionListeners()[0]);
+		
+		btnStopAlg.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				render.getRenderMap().getAlgorithm().setStopAlgorithm(true);
+			}
+		});
 		
 		sliderAnimSpeed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
