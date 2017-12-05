@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.JOptionPane;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -60,6 +62,7 @@ public class JsonWriteRead {
 	public void writePathToJSON(String pathFile, ArrayList<Node> path) {
 		JSONObject JSONPath = new JSONObject();
 		
+		JSONPath.put("type", "path");
 		JSONPath.put("path_length", path.size());
 		for(int i = 0; i < path.size(); i++) {
 			JSONPath.put(i, nodeToString(path.get(i)));
@@ -102,6 +105,7 @@ public class JsonWriteRead {
 		
 
 		JSONObject JSONmap = new JSONObject();
+		JSONmap.put("type", "map");
 		JSONmap.put("sizeZ", Integer.toString(sizeZ));
 		JSONmap.put("sizeY", Integer.toString(sizeY));
 		JSONmap.put("sizeX", Integer.toString(sizeX));
@@ -120,6 +124,10 @@ public class JsonWriteRead {
 
 		return true;
 	}
+	
+	public void errorBox(String errorMessage, String errorTitle) {
+		JOptionPane.showMessageDialog(null, errorMessage, errorTitle, JOptionPane.ERROR_MESSAGE);
+	}
 
 	public int[][][] loadMapFromJSON(String path) {
 		// Wczytywanie
@@ -135,6 +143,12 @@ public class JsonWriteRead {
 			Object obj = parser.parse(new FileReader(path));
 			JSONObject jsonObject = (JSONObject) obj;
 
+			String type = jsonObject.get("type").toString();
+			System.out.println(type);
+			if (!type.equals("map")) {
+				throw new Exception("Wczytywany plik nie jest map¹");
+			}
+			
 			sizeZfromJSON = Integer.parseInt((String) jsonObject.get("sizeZ"));
 			sizeYfromJSON = Integer.parseInt((String) jsonObject.get("sizeY"));
 			sizeXfromJSON = Integer.parseInt((String) jsonObject.get("sizeX"));
@@ -178,10 +192,13 @@ public class JsonWriteRead {
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			errorBox(e.getLocalizedMessage(), "Error: file not found");
 		} catch (IOException e) {
 			e.printStackTrace();
+			errorBox("Wystapi³ problem z wczytaniem pliku", "IO Error");
 		} catch (Exception e) {
 			e.printStackTrace();
+			errorBox(e.getMessage(), "Error");
 		}
 
 		return inputMap;

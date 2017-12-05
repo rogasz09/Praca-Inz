@@ -29,7 +29,7 @@ public class Map {
 	
 	private boolean isStart, isEnd;
 	private boolean isAnimation;
-	private volatile int speedAnimation = 5;
+	private int speedAnimation = 5;
 	
 	private Algorithm algorithm;
 	private int numberIteration = 0;
@@ -146,6 +146,7 @@ public class Map {
 	
 	public void makeShiftList() {
 		// ustawienie przesuniêæ dla mapy
+		animator.pause();
 		obstacleShift.clear();
 		forbiddenShift.clear();
 		pathShift.clear();
@@ -160,6 +161,7 @@ public class Map {
 				}
 			}
 		}
+		animator.resume();
 	}
 	
 	public int[][][] rasterMapToIntMap(){

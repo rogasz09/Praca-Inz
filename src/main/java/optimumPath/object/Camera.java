@@ -143,7 +143,8 @@ public class Camera implements MouseListener, MouseMotionListener, MouseWheelLis
 		
 		double pPosZ = lengthY*2.1 - sizeRaster;
 		setPointCenter(new Point3d(pCenterX, pCenterY, pCenterZ));
-		setPointPos(new Point3d(pCenterX+0.05, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
+		setPointPos(new Point3d(pCenterX, Math.tan(Math.toRadians(13.0))*pPosZ, pPosZ ));
+		rotateView(-5, 0, new Dimension(10, 10));
     }
     
     //ustawienie kamery w œrodku modyfikowanej warstwy obejmuj¹c¹ ca³¹ warstwe

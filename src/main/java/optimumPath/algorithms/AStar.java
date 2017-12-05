@@ -11,11 +11,6 @@ public class AStar extends Algorithm {
 	public AStar(Map inputMap) {
 		super(inputMap);
 	}
-	
-	private double getChebyshevCost(Node actualNode,Node neighbour) {
-		int direction =  checkChebyshevDirection(actualNode, neighbour);
-		return Math.sqrt((double)direction);
-	}
 
 	public void perform(boolean isChebyshev) {
 		if(!checkBeforePerform())
@@ -46,6 +41,7 @@ public class AStar extends Algorithm {
 		
 		while (!openset.isEmpty() && !stopAlgorithm) {
 			numberIteration += 1;
+			System.out.println(numberIteration);
 			
 			x = getLowestFCostIndex(openset);
 			Node actualNode = openset.get(x);

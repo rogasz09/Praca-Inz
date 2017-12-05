@@ -174,9 +174,9 @@ public class Algorithm {
 	}
 	
 	public boolean isStartEndInForbidden() {
-		if (map[startNode.getZ()][startNode.getY()][startNode.getY()] == Raster.FORBIDDEN)
+		if (map[startNode.getZ()][startNode.getY()][startNode.getX()] == Raster.FORBIDDEN)
 			return true;
-		if (map[endNode.getZ()][endNode.getY()][endNode.getY()] == Raster.FORBIDDEN)
+		if (map[endNode.getZ()][endNode.getY()][endNode.getX()] == Raster.FORBIDDEN)
 			return true;
 		
 		return false;
@@ -346,6 +346,11 @@ public class Algorithm {
 	/*****************************************************
 	 Metody dla metryki Chebyshev
 	 *****************************************************/
+	
+	protected double getChebyshevCost(Node actualNode,Node neighbour) {
+		int direction =  checkChebyshevDirection(actualNode, neighbour);
+		return Math.sqrt((double)direction);
+	}
 	
 	protected int checkChebyshevDirection(Node actualNode, Node neighbour) {
 		int sameX,sameY,sameZ;

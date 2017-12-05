@@ -63,7 +63,7 @@ public class WindowColorSettings extends JDialog implements ActionListener{
 		
 		setResizable(false);
 		setTitle("Ustawienia kolor\u00F3w");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
 		setBounds(100, 100, 475, 398);
 		
 		getContentPane().setLayout(new BorderLayout());

@@ -143,7 +143,7 @@ public class WindowMain extends JFrame {
 	
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
 		setResizable(false);
 		setBounds(100, 100, 1041, 804);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -445,7 +445,7 @@ public class WindowMain extends JFrame {
 		sliderAnimSpeed.setMaximum(105);
 		sliderAnimSpeed.setValue(55);
 		sliderAnimSpeed.setMinimum(5);
-		sliderAnimSpeed.setToolTipText("");
+		sliderAnimSpeed.setToolTipText("Szybkoœæ animacji");
 		sliderAnimSpeed.setSnapToTicks(true);
 		sliderAnimSpeed.setPaintTicks(true);
 		sliderAnimSpeed.setPaintLabels(true);
@@ -929,12 +929,25 @@ public class WindowMain extends JFrame {
 				}
 			}
 		});
+
 		
 		btnStartAlg.addActionListener(btnApply.getActionListeners()[0]);
 		
 		btnStopAlg.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				render.getRenderMap().getAlgorithm().setStopAlgorithm(true);
+				if (render.getRenderMap().getAlgorithm() != null)
+					render.getRenderMap().getAlgorithm().setStopAlgorithm(true);
+			}
+		});
+		
+		btnHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				WindowHelp Help = new WindowHelp();
+				int loactionX = getX() + (getWidth() - Help.getWidth())/2;
+				int loactionY = getY() + (getHeight() - Help.getHeight())/2;
+				Help.setLocation(loactionX, loactionY);
+				Help.setModal(true);
+				Help.setVisible(true);
 			}
 		});
 		
@@ -1038,6 +1051,8 @@ public class WindowMain extends JFrame {
 		mntmCopyLayer.addActionListener(btnCopyLayer.getActionListeners()[0]);
 		mntmPasteLayer.addActionListener(btnPasteLayer.getActionListeners()[0]);
 		mntmSavePath.addActionListener(btnSavePath.getActionListeners()[0]);
+		
+		mntmHelp.addActionListener(btnHelp.getActionListeners()[0]);
 
 		ActionListener GroupPopupListener = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

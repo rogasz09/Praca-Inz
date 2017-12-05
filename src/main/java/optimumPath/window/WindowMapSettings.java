@@ -41,7 +41,7 @@ public class WindowMapSettings extends JDialog {
 		setResizable(false);
 		setTitle("Ustawienia Mapy");
 		setBounds(100, 100, 298, 301);
-		setIconImage(Toolkit.getDefaultToolkit().getImage("toolbar_icons/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

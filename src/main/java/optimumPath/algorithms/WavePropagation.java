@@ -160,6 +160,7 @@ public class WavePropagation extends Algorithm{
 				if (index != -1) {
 					if (processedNodes.get(index).getF() == lastNodePath.getF()-1) {
 						if (checkPossibleTransition(lastNodePath, processedNodes.get(index))) {
+							lengthPath += this.getChebyshevCost(lastNodePath, neighbours.get(i));
 							getPath().add(processedNodes.get(index));
 							lastNodePath = getPath().get(getPath().size() - 1);
 							break;
@@ -169,7 +170,7 @@ public class WavePropagation extends Algorithm{
 			}
 		}
 
-		lengthPath = node.getF();
+		//lengthPath = node.getF();
 		numberRasterPath = getPath().size();
 		printList(getPath());
 	}
