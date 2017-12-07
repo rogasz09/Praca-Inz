@@ -27,8 +27,8 @@ public class WindowAbout extends JDialog {
 	 * Create the dialog.
 	 */
 	public WindowAbout() {
-		setTitle("Autorzy");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
+		setTitle("Informacje o programie");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/icon.png")));
 		setResizable(false);
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
@@ -44,30 +44,36 @@ public class WindowAbout extends JDialog {
 		JLabel lblPromoter = new JLabel("Promotor: dr in\u017C. Krystyna Rudzi\u0144ska-Korma\u0144ska");
 		lblPromoter.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		
-		JLabel lblCathedral = new JLabel("<html><center>Katedra System\u00F3w Decyzyjnych i Robotyki<br>\r\nETI Politechnika Gda\u0144ska</center>");
+		JLabel lblCathedral = new JLabel("<html><center>Katedra System\u00F3w Decyzyjnych i Robotyki<br>\r\nETI Politechnika Gda\u0144ska 2017</center>");
 		lblCathedral.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		
+		JLabel lblWersjaProgramu = new JLabel("Wersja programu: 1.0.4.0");
+		lblWersjaProgramu.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(
-			gl_contentPanel.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_contentPanel.createSequentialGroup()
-					.addContainerGap(47, Short.MAX_VALUE)
+			gl_contentPanel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPanel.createSequentialGroup()
+					.addContainerGap(45, Short.MAX_VALUE)
 					.addComponent(lblName, GroupLayout.PREFERRED_SIZE, 360, GroupLayout.PREFERRED_SIZE)
 					.addGap(29))
-				.addGroup(gl_contentPanel.createSequentialGroup()
+				.addGroup(Alignment.LEADING, gl_contentPanel.createSequentialGroup()
 					.addGap(59)
 					.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblWersjaProgramu)
 						.addComponent(lblAuthors)
 						.addGroup(gl_contentPanel.createParallelGroup(Alignment.TRAILING)
 							.addComponent(lblCathedral, GroupLayout.PREFERRED_SIZE, 302, GroupLayout.PREFERRED_SIZE)
 							.addComponent(lblPromoter)))
-					.addContainerGap(59, Short.MAX_VALUE))
+					.addContainerGap(57, Short.MAX_VALUE))
 		);
 		gl_contentPanel.setVerticalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPanel.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblName, GroupLayout.PREFERRED_SIZE, 53, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(lblWersjaProgramu)
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblAuthors)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblPromoter)

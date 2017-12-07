@@ -2,20 +2,13 @@ package optimumPath.window;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -26,19 +19,14 @@ import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.ToolTipManager;
 import javax.swing.border.TitledBorder;
-import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JSpinner;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
@@ -52,26 +40,20 @@ import optimumPath.opengl.*;
 import optimumPath.object.Map;
 import optimumPath.common.Point3d;
 import optimumPath.JSON.*;
-import optimumPath.algorithms.Algorithm;
 
 import java.awt.Component;
 import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import javax.swing.JRadioButtonMenuItem;
 import java.awt.FlowLayout;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.SystemColor;
 import javax.swing.SwingConstants;
 import java.awt.Toolkit;
+import javax.swing.DefaultComboBoxModel;
+import net.miginfocom.swing.MigLayout;
 
 
 public class WindowMain extends JFrame {
@@ -81,69 +63,52 @@ public class WindowMain extends JFrame {
 	 */
 	private static final long serialVersionUID = -267010437272070514L;
 	
+	private JFrame windowMain = this;
 	private Render render;
 	private JsonWriteRead json;
 	
-	private JMenuBar menuBar;
-	private JSlider sliderAnimSpeed;
-	private JButton btnApply;
+	/*Inne kontrolki*/
 	private JSpinner spnLayer;
+	private JSpinner spnThick;
 	private JRadioButton rdbtnPreview, rdbtnMapMod;
-	private JComboBox cbAlgorithm, cbMetrics;
-	private ToolBarButton btnNewMap, btnSaveMap, btnLoadMap, btnExit;
-	private JMenuItem mntmExit, mntmLoadMap, mntmSaveMap, mntmNewMap;
+	private JLabel txtAlg, txtMetric, txtPathLeng, txtNumbRaster, txtIteration;
+	private JComboBox<String> cbAlgorithm, cbMetrics, cbZoneProhibited;
+	/*Menu animacji*/
+	private JSlider sliderAnimSpeed;
+	private JCheckBox cboxAnimation;
+	private JButton btnApply;
+	/*Przyciski do toolbar*/
+	private ToolBarButton btnNewMap, btnSaveMap, btnLoadMap;
+	private ToolBarToggleButton btnObst, btnDelObst, btnStart, btnEnd;
+	private ToolBarButton btnSaveScreen, btnSavePath;
+	private ToolBarButton btnCopyLayer, btnPasteLayer;
+	private ToolBarButton btnStopAlg, btnStartAlg;
+	private ToolBarButton btnHelp, btnExit;
+	/*Menu kontekstowe*/
+	private JMenuBar menuBar;
+	private JMenuItem mntmExit, mntmLoadMap, mntmSaveMap, mntmSavePath, mntmNewMap;
+	private JMenuItem mntmCopyLayer, mntmPasteLayer;
+	private JMenuItem mntmHelp, mntmAuthors;
+	private JMenuItem mntmClearLayer, mntmClearMap;
+	private JMenuItem mntmSaveScreen, mntmMapSettings, mntmColorSettings;
 	private JRadioButtonMenuItem mntmDrawObstacle, mntmDelObstacle, mntmCheckStartPoint, mntmCheckStopPoint;
 	
-	//Create a file chooser
-	final private JFileChooser fc;
-	private JFrame windowMain = this;
-	private ToolBarToggleButton btnObst;
-	private ToolBarToggleButton btnDelObst;
-	private ToolBarToggleButton btnStart;
-	private ToolBarToggleButton btnEnd;
-	private ToolBarButton btnHelp;
-	private ToolBarButton btnSaveScreen;
-	private ToolBarButton btnCopyLayer;
-	private ToolBarButton btnPasteLayer;
-	private JPanel panelSafe;
-	private JLabel label;
-	private JComboBox cbZoneProhibited;
-	private JCheckBox cboxAnimation;
+	/*Grupy przyciskow*/
 	private final ButtonGroup bgToolbarMenu = new ButtonGroup();
 	private final ButtonGroup bgPopupMenu = new ButtonGroup();
-	private JSeparator separator_1;
-	private JMenuItem mntmCopyLayer;
-	private JMenuItem mntmPasteLayer;
-	private JMenuItem mntmSaveScreen;
-	private JSeparator separator_2;
-	private JMenu mnHelp;
-	private JMenuItem mntmHelp;
-	private JMenuItem mntmAuthors;
-	private JSeparator separator_3;
-	private JMenuItem mntmClearLayer;
-	private JMenuItem mntmClearMap;
-	private JMenu mnNarzdzia;
-	private JMenuItem mntmMapSettings;
-	private JMenuItem mntmColorSettings;
-	private JSeparator separator_4;
-	private JPanel GLpanel;
-	private JLabel txtAlg;
-	private JLabel txtMetric;
-	private JLabel txtPathLeng;
-	private JLabel txtNumbRaster;
-	private JLabel txtIteration;
-	private JMenuItem mntmSavePath;
-	private ToolBarButton btnSavePath;
-	private JSpinner spnThick;
-	private ToolBarButton btnStopAlg, btnStartAlg;
 	
+	//Tworznie file chooser
+	final private JFileChooser fc;
+	//Panel dla okna OpenGL
+	private JPanel GLpanel;
+
 	/**
 	 * G³ówna aplikacja.
 	 */
 	
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/icon.png")));
 		setResizable(false);
 		setBounds(100, 100, 1041, 804);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -165,8 +130,6 @@ public class WindowMain extends JFrame {
 		initLayerSpinner();
 		setTxtAlgMetric();
 		getResults();
-		//wpiêcie okna opengl do JPanel
-		//
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -204,7 +167,7 @@ public class WindowMain extends JFrame {
 		mntmSavePath = new JMenuItem("Zapisz \u015Bcie\u017Ck\u0119");
 		mnFiles.add(mntmSavePath);
 		
-		separator_2 = new JSeparator();
+		JSeparator separator_2 = new JSeparator();
 		mnFiles.add(separator_2);
 		
 		mntmExit = new JMenuItem("Zamknij");
@@ -230,7 +193,7 @@ public class WindowMain extends JFrame {
 		bgPopupMenu.add(mntmCheckStopPoint);
 		mnEdition.add(mntmCheckStopPoint);
 		
-		separator_1 = new JSeparator();
+		JSeparator separator_1 = new JSeparator();
 		mnEdition.add(separator_1);
 		
 		mntmCopyLayer = new JMenuItem("Kopiuj warstw\u0119");
@@ -241,7 +204,7 @@ public class WindowMain extends JFrame {
 		mntmPasteLayer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
 		mnEdition.add(mntmPasteLayer);
 		
-		separator_3 = new JSeparator();
+		JSeparator separator_3 = new JSeparator();
 		mnEdition.add(separator_3);
 		
 		mntmClearLayer = new JMenuItem("Wyczy\u015B\u0107 warstw\u0119");
@@ -251,31 +214,29 @@ public class WindowMain extends JFrame {
 		mntmClearMap = new JMenuItem("Wyczy\u015B\u0107 map\u0119");
 		mnEdition.add(mntmClearMap);
 		
-		mnNarzdzia = new JMenu("Narz\u0119dzia");
-		menuBar.add(mnNarzdzia);
-		
-		separator_4 = new JSeparator();
-		mnNarzdzia.add(separator_4);
+		JMenu mnTools = new JMenu("Narz\u0119dzia");
+		menuBar.add(mnTools);
 		
 		mntmSaveScreen = new JMenuItem("Zapisz widok");
-		mnNarzdzia.add(mntmSaveScreen);
+		mnTools.add(mntmSaveScreen);
 		
 		JSeparator separator = new JSeparator();
-		mnNarzdzia.add(separator);
+		mnTools.add(separator);
 		
 		mntmMapSettings = new JMenuItem("Ustawienia mapy");
-		mnNarzdzia.add(mntmMapSettings);
+		mnTools.add(mntmMapSettings);
 		
 		mntmColorSettings = new JMenuItem("Ustawienia kolor\u00F3w");
-		mnNarzdzia.add(mntmColorSettings);
+		mnTools.add(mntmColorSettings);
 		
-		mnHelp = new JMenu("Pomoc");
+		JMenu mnHelp = new JMenu("Pomoc");
 		menuBar.add(mnHelp);
 		
 		mntmHelp = new JMenuItem("Pomoc");
+		mntmHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 		mnHelp.add(mntmHelp);
 		
-		mntmAuthors = new JMenuItem("Autorzy");
+		mntmAuthors = new JMenuItem("O programie...");
 		mnHelp.add(mntmAuthors);
 		
 		JPanel contentPanel = new JPanel();
@@ -347,15 +308,19 @@ public class WindowMain extends JFrame {
 		panelAlg.setToolTipText("");
 		panelOptions.add(panelAlg);
 		
-		cbAlgorithm = new JComboBox();
-		cbAlgorithm.setModel(new DefaultComboBoxModel(new String[] {"Propagacja Fali", "A Star"}));
+		String[] algorithmsOptions = {"Propagacja Fali", "A Star"};
+		cbAlgorithm = new JComboBox<String>();
+		cbAlgorithm.setModel(new DefaultComboBoxModel<String>(algorithmsOptions));
+		//algorithmsOptions
 		
 		JLabel lblWybrAlgorytmu = new JLabel("Wyb\u00F3r algorytmu:");
 		
 		JLabel lblWybrMetryki = new JLabel("Wyb\u00F3r metryki:");
 		
-		cbMetrics = new JComboBox();
-		cbMetrics.setModel(new DefaultComboBoxModel(new String[] {"Manhatan", "Czebyszew"}));
+		String[] metricsOptions = {"Manhatan", "Czebyszew"};
+		cbMetrics = new JComboBox<String>();
+		cbMetrics.setModel(new DefaultComboBoxModel<String>(metricsOptions));
+		
 		GroupLayout gl_panelAlg = new GroupLayout(panelAlg);
 		gl_panelAlg.setHorizontalGroup(
 			gl_panelAlg.createParallelGroup(Alignment.LEADING)
@@ -389,15 +354,16 @@ public class WindowMain extends JFrame {
 		);
 		panelAlg.setLayout(gl_panelAlg);
 		
-		panelSafe = new JPanel();
+		JPanel panelSafe = new JPanel();
 		panelSafe.setAlignmentY(Component.TOP_ALIGNMENT);
 		panelSafe.setBorder(new TitledBorder(null, "Strefa bezpiecze\u0144stwa", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelOptions.add(panelSafe);
 		
-		label = new JLabel("Rodzaj strefy bezpiecze\u0144stwa:");
+		JLabel lblZone = new JLabel("Rodzaj strefy bezpiecze\u0144stwa:");
 		
-		cbZoneProhibited = new JComboBox();
-		cbZoneProhibited.setModel(new DefaultComboBoxModel(new String[] {"Brak", "Wok\u00F3\u0142 przeszk\u00F3d", "Wok\u00F3\u0142 robota"}));
+		String[] zoneOptions = {"Brak", "Wok\u00F3\u0142 przeszk\u00F3d", "Wok\u00F3\u0142 robota"};
+		cbZoneProhibited = new JComboBox<String>();
+		cbZoneProhibited.setModel(new DefaultComboBoxModel<String>(zoneOptions));
 		
 		spnThick = new JSpinner();
 		spnThick.setModel(new SpinnerNumberModel(1, 1, 2, 1));
@@ -409,7 +375,7 @@ public class WindowMain extends JFrame {
 				.addGroup(gl_panelSafe.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panelSafe.createParallelGroup(Alignment.LEADING)
-						.addComponent(label, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblZone, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
 						.addComponent(cbZoneProhibited, 0, 207, Short.MAX_VALUE)
 						.addGroup(gl_panelSafe.createSequentialGroup()
 							.addComponent(lblWielkoStrefy)
@@ -421,7 +387,7 @@ public class WindowMain extends JFrame {
 			gl_panelSafe.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelSafe.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label)
+					.addComponent(lblZone)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(cbZoneProhibited, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
@@ -491,79 +457,41 @@ public class WindowMain extends JFrame {
 		panelConsole.setBackground(SystemColor.control);
 		panelMain.add(panelConsole, BorderLayout.SOUTH);
 		
-		JLabel lblNewLabel = new JLabel("D\u0142ugo\u015B\u0107 \u015Bcie\u017Cki: ");
-		
 		JLabel lblNewLabel_1 = new JLabel("Algorytm: ");
 		
 		JLabel lblNewLabel_2 = new JLabel("Metryka: ");
 		
-		JLabel lblNewLabel_3 = new JLabel("Ilo\u015B\u0107 iteracji: ");
-		
-		JLabel lblNewLabel_4 = new JLabel("Ilo\u015B\u0107 rastr\u00F3w \u015Bcie\u017Cki: ");
-		
 		txtAlg = new JLabel("");
-		txtAlg.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtAlg.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		txtMetric = new JLabel("");
-		txtMetric.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtMetric.setHorizontalAlignment(SwingConstants.LEFT);
+		panelConsole.setLayout(new MigLayout("", "[60px][126px][70px][76px][30px][70px][36px][70px]", "[16px][16px]"));
+		panelConsole.add(lblNewLabel_1, "cell 0 0,alignx left,aligny top");
+		
+		JLabel lblNewLabel = new JLabel("D\u0142ugo\u015B\u0107 \u015Bcie\u017Cki: ");
+		panelConsole.add(lblNewLabel, "cell 3 0,alignx left,aligny top");
 		
 		txtPathLeng = new JLabel("");
-		txtPathLeng.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtPathLeng.setHorizontalAlignment(SwingConstants.LEFT);
+		panelConsole.add(txtPathLeng, "cell 4 0,growx,aligny top");
 		
-		txtNumbRaster = new JLabel("");
-		txtNumbRaster.setHorizontalAlignment(SwingConstants.RIGHT);
+		JLabel lblNewLabel_3 = new JLabel("Ilo\u015B\u0107 iteracji: ");
+		panelConsole.add(lblNewLabel_3, "cell 6 0,alignx left,aligny top");
 		
 		txtIteration = new JLabel("");
-		txtIteration.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtIteration.setHorizontalAlignment(SwingConstants.LEFT);
+		panelConsole.add(txtIteration, "cell 7 0,growx,aligny top");
+		panelConsole.add(lblNewLabel_2, "cell 0 1,alignx left,aligny top");
+		panelConsole.add(txtMetric, "cell 1 1,growx,aligny top");
+		panelConsole.add(txtAlg, "cell 1 0,growx,aligny top");
 		
-		GroupLayout gl_panelConsole = new GroupLayout(panelConsole);
-		gl_panelConsole.setHorizontalGroup(
-			gl_panelConsole.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelConsole.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING)
-						.addComponent(lblNewLabel_1)
-						.addComponent(lblNewLabel_2))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(txtMetric, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(txtAlg, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
-					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING)
-						.addComponent(lblNewLabel)
-						.addComponent(lblNewLabel_4))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(txtNumbRaster, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(txtPathLeng, GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
-					.addGap(32)
-					.addComponent(lblNewLabel_3)
-					.addGap(6)
-					.addComponent(txtIteration, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(231, Short.MAX_VALUE))
-		);
-		gl_panelConsole.setVerticalGroup(
-			gl_panelConsole.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panelConsole.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.TRAILING)
-						.addComponent(lblNewLabel_3)
-						.addComponent(txtIteration, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
-						.addComponent(txtAlg, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblNewLabel_1)
-						.addComponent(lblNewLabel)
-						.addComponent(txtPathLeng, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-					.addGroup(gl_panelConsole.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_panelConsole.createSequentialGroup()
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(lblNewLabel_2))
-						.addComponent(txtMetric, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblNewLabel_4)
-						.addComponent(txtNumbRaster, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE))
-					.addGap(13))
-		);
-		panelConsole.setLayout(gl_panelConsole);
+		JLabel lblNewLabel_4 = new JLabel("Ilo\u015B\u0107 rastr\u00F3w \u015Bcie\u017Cki: ");
+		panelConsole.add(lblNewLabel_4, "cell 3 1,alignx right,aligny top");
+		
+		txtNumbRaster = new JLabel("");
+		txtNumbRaster.setHorizontalAlignment(SwingConstants.LEFT);
+		panelConsole.add(txtNumbRaster, "cell 4 1,growx,aligny top");
 		
 		GLpanel = new JPanel();
 		panelMain.add(GLpanel, BorderLayout.CENTER);
@@ -624,24 +552,24 @@ public class WindowMain extends JFrame {
 		bgToolbarMenu.setSelected(btnObst.getModel(), true);
 		bgPopupMenu.setSelected(mntmDrawObstacle.getModel(), true);
 		
-		btnNewMap.setIcon(new ImageIcon("toolbar_icons/new.png"));
-		btnSaveMap.setIcon(new ImageIcon("toolbar_icons/save.png"));
-		btnLoadMap.setIcon(new ImageIcon("toolbar_icons/open.png"));
+		btnNewMap.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/new.png")));
+		btnSaveMap.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/save.png")));
+		btnLoadMap.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/open.png")));
 		
-		btnObst.setIcon(new ImageIcon("toolbar_icons/obst.png"));
-		btnDelObst.setIcon(new ImageIcon("toolbar_icons/delobst.png"));
-		btnStart.setIcon(new ImageIcon("toolbar_icons/start.png"));
-		btnEnd.setIcon(new ImageIcon("toolbar_icons/finish.png"));
-		btnCopyLayer.setIcon(new ImageIcon("toolbar_icons/copy.png"));
-		btnPasteLayer.setIcon(new ImageIcon("toolbar_icons/paste.png"));
+		btnObst.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/obst.png")));
+		btnDelObst.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/delobst.png")));
+		btnStart.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/start.png")));
+		btnEnd.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/finish.png")));
+		btnCopyLayer.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/copy.png")));
+		btnPasteLayer.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/paste.png")));
 		
-		btnStartAlg.setIcon(new ImageIcon("toolbar_icons/perform.png"));
-		btnStopAlg.setIcon(new ImageIcon("toolbar_icons/stop.png"));
+		btnStartAlg.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/perform.png")));
+		btnStopAlg.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/stop.png")));
 		
-		btnSavePath.setIcon(new ImageIcon("toolbar_icons/path.png"));
-		btnSaveScreen.setIcon(new ImageIcon("toolbar_icons/camera.png"));
-		btnHelp.setIcon(new ImageIcon("toolbar_icons/help.png"));
-		btnExit.setIcon(new ImageIcon("toolbar_icons/exit.png"));
+		btnSavePath.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/path.png")));
+		btnSaveScreen.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/camera.png")));
+		btnHelp.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/help.png")));
+		btnExit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("toolbar_icons/exit.png")));
 		
 		toolBar.add(btnNewMap);
 		toolBar.add(btnSaveMap);
@@ -667,17 +595,19 @@ public class WindowMain extends JFrame {
 		
 	}
 	
+	//////////////////////////////////////////
+	// Metody obs³ugi komponentów
+	//////////////////////////////////////////
+	
 	public void initLayerSpinner() {
 		int maxLayer = render.getRenderMap().getSizeZ() - 1;
 		spnLayer.setModel(new SpinnerNumberModel(0, 0, maxLayer, 1));
-		//spnLayer.setValue(Integer.valueOf(0));
 	}
 
 	public void setOffsetMap() {
 		int layer = ((Integer)spnLayer.getValue()).intValue();
 		render.setOffsetLayer(layer);
 	}
-	
 	
 	public int getSelectedToolbarButton() {
 		if (bgToolbarMenu.isSelected(btnObst.getModel()))
@@ -715,6 +645,35 @@ public class WindowMain extends JFrame {
 		txtIteration.setText(((Integer)render.getRenderMap().getNumberIteration()).toString());
 		txtNumbRaster.setText(((Integer)render.getRenderMap().getNumberRasterPath()).toString());
 		txtPathLeng.setText(((Double)length).toString());
+	}
+	
+	public void setComponentsEnableAlg(boolean enable) {
+		//przyciski menu kontekstoweg
+		mntmNewMap.setEnabled(enable);
+		mntmSaveMap.setEnabled(enable);
+		mntmLoadMap.setEnabled(enable);
+		mntmSavePath.setEnabled(enable);
+		
+		mntmCopyLayer.setEnabled(enable);
+		mntmPasteLayer.setEnabled(enable);
+		mntmClearLayer.setEnabled(enable);
+		mntmClearMap.setEnabled(enable);
+		
+		mntmMapSettings.setEnabled(enable);
+		mntmColorSettings.setEnabled(enable);
+		
+		//przyciski paska narzêdzi
+		btnNewMap.setEnabled(enable);
+		btnSaveMap.setEnabled(enable);
+		btnLoadMap.setEnabled(enable);
+		btnSavePath.setEnabled(enable);
+		
+		btnCopyLayer.setEnabled(enable);
+		btnPasteLayer.setEnabled(enable);
+		
+		//przyciski panelu mapy
+		rdbtnPreview.setEnabled(enable);
+		rdbtnMapMod.setEnabled(enable);
 	}
 	
 	///////////////////////////////////////////////////////////////////
@@ -910,6 +869,10 @@ public class WindowMain extends JFrame {
 		
 		btnApply.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if (render.isMapCreation())
+					return;
+				
+				setComponentsEnableAlg(false);
 				render.setAnimation(cboxAnimation.isSelected());
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 				render.getRenderMap().resetPath();

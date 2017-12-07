@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -60,16 +61,17 @@ public class JsonWriteRead {
 	}
 	
 	public void writePathToJSON(String pathFile, ArrayList<Node> path) {
-		JSONObject JSONPath = new JSONObject();
 		
-		JSONPath.put("type", "path");
-		JSONPath.put("path_length", path.size());
+		HashMap<Object, Object>  pathDetail = new HashMap<Object, Object>();
+		
+		pathDetail.put("type", "path");
+		pathDetail.put("path_length", path.size());
 		for(int i = 0; i < path.size(); i++) {
-			JSONPath.put(i, nodeToString(path.get(i)));
+			pathDetail.put(i, nodeToString(path.get(i)));
 		}
 		
 		try (FileWriter file = new FileWriter(pathFile)) {
-
+			JSONObject JSONPath = new JSONObject(pathDetail);
 			file.write(JSONPath.toString());
 			file.flush();
 
@@ -104,12 +106,15 @@ public class JsonWriteRead {
 		
 		
 
-		JSONObject JSONmap = new JSONObject();
-		JSONmap.put("type", "map");
-		JSONmap.put("sizeZ", Integer.toString(sizeZ));
-		JSONmap.put("sizeY", Integer.toString(sizeY));
-		JSONmap.put("sizeX", Integer.toString(sizeX));
-		JSONmap.put("map", temp);
+		
+		HashMap<String, String>  mapDetail = new HashMap<String, String>();
+		mapDetail.put("type", "map");
+		mapDetail.put("sizeZ", Integer.toString(sizeZ));
+		mapDetail.put("sizeY", Integer.toString(sizeY));
+		mapDetail.put("sizeX", Integer.toString(sizeX));
+		mapDetail.put("map", temp);
+		
+		JSONObject JSONmap = new JSONObject(mapDetail);
 
 		try (FileWriter file = new FileWriter(path)) {
 

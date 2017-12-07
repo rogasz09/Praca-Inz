@@ -1,16 +1,10 @@
 package optimumPath;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import org.junit.Test;
 
 import optimumPath.algorithms.AStar;
-import optimumPath.algorithms.Node;
 import optimumPath.common.Raster;
 import optimumPath.object.Map;
 

@@ -23,6 +23,16 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
 			<artifactId>gluegen-rt-main</artifactId>
 			<version>2.3.1</version>
 		</dependency>
@@ -47,6 +57,18 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/resources</directory>
+				<includes>
+					<include>**/*.htm</include>
+					<include>**/*.png</include>
+					<include>**/*.gif</include>
+					<include>**/*.ico</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -82,26 +104,13 @@
 
 			<!-- build file exe -->
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
+				<version>2.10</version> <executions> <execution> <id>copy-dependencies</id> 
+				<phase>package</phase> <goals> <goal>copy-dependencies</goal> </goals> <configuration> 
+				<outputDirectory>${project.build.directory}</outputDirectory> <overWriteReleases>false</overWriteReleases> 
+				<overWriteSnapshots>false</overWriteSnapshots> <overWriteIfNewer>true</overWriteIfNewer> 
+				</configuration> </execution> </executions> </plugin> -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -131,28 +140,36 @@
 				<version>1.7.21</version>
 				<executions>
 					<execution>
-						<id>l4j-clui</id>
+						<id>l4j-gui</id>
 						<phase>package</phase>
 						<goals>
 							<goal>launch4j</goal>
 						</goals>
 						<configuration>
 							<headerType>console</headerType>
-							<jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
-							<outfile>${project.build.directory}/OptimumPath.exe</outfile>
+							<jar>target/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
+							<outfile>target/OptimumPath.exe</outfile>
 							<downloadUrl>http://java.com/download</downloadUrl>
-
+							<errTitle>App Err</errTitle>
 							<classPath>
 								<mainClass>optimumPath.main.RunOptimumPath</mainClass>
 								<preCp>anything</preCp>
 							</classPath>
+							<icon>src/resources/images/icon.ico</icon>
+							<addDependency>true</addDependency>
+							<dontWrapJar>false</dontWrapJar>
 							<jre>
-								<bundledJre64Bit>false</bundledJre64Bit>
-                                <bundledJreAsFallback>false</bundledJreAsFallback>
+								<!-- <bundledJre64Bit>false</bundledJre64Bit> <bundledJreAsFallback>false</bundledJreAsFallback> 
+									<path>jre</path> <minVersion>1.8.0</minVersion> <jdkPreference>preferJre</jdkPreference> 
+									<runtimeBits>64/32</runtimeBits> -->
 								<path>jre</path>
-								<minVersion>1.8.0</minVersion>
+								<bundledJre64Bit>true</bundledJre64Bit>
+								<minVersion />
+								<maxVersion />
 								<jdkPreference>preferJre</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
+								<opts>
+									<opt>-cp yourclasspath</opt>
+								</opts>
 							</jre>
 							<versionInfo>
 								<fileVersion>1.0.0.0</fileVersion>
@@ -170,7 +187,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 
 		</plugins>
 	</build>

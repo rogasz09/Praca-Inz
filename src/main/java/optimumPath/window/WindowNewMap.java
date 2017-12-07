@@ -44,7 +44,7 @@ public class WindowNewMap extends JDialog {
 		setResizable(false);
 		setTitle("Nowa mapa");
 		setBounds(100, 100, 280, 218);
-		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/icon.png")));
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

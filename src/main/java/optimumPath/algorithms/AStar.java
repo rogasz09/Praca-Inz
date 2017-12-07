@@ -41,7 +41,7 @@ public class AStar extends Algorithm {
 		
 		while (!openset.isEmpty() && !stopAlgorithm) {
 			numberIteration += 1;
-			System.out.println(numberIteration);
+			//System.out.println(numberIteration);
 			
 			x = getLowestFCostIndex(openset);
 			Node actualNode = openset.get(x);

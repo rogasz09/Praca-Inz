@@ -5,20 +5,19 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JEditorPane;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
+
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
 
 
 public class WindowHelp extends JDialog {
@@ -34,7 +33,7 @@ public class WindowHelp extends JDialog {
 	 */
 	public WindowHelp() {
 		setTitle("Pomoc do programu");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("images/icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/icon.png")));
 		setBounds(100, 100, 633, 493);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -75,9 +74,11 @@ public class WindowHelp extends JDialog {
 	
 	private void loadHelp() {
 		try {
-			File file = new File("help/help.htm");
-			helpPane.setPage(file.toURI().toURL());
+//			File file = new File("help/help.htm");
+			helpPane.setPage(getClass().getClassLoader().getResource("help/help.htm"));
+//			helpPane.setPage(file.toURI().toURL());
 		} catch (IOException ex) {
+			ex.printStackTrace();
 			dispose();
     		JOptionPane.showMessageDialog(null, "Nie uda³o siê wczytaæ pliku help.htm",
     			   								"B³¹d odczytu", JOptionPane.ERROR_MESSAGE);

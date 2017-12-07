@@ -20,6 +20,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -117,6 +118,7 @@ public class Render implements GLEventListener {
 		if (renderMap.getAlgProcessor() != null)
 			if(renderMap.getAlgProcessor().isFinish()) {
 				renderMap.resultAlgorithm();
+				window.setComponentsEnableAlg(true);
 				window.getResults();
 			}
 		
@@ -160,7 +162,13 @@ public class Render implements GLEventListener {
 		//gl.glEnable (GL2.GL_COLOR_MATERIAL);
 		gl.glColorMaterial(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE);
 		gl.glMaterialf(GL2.GL_FRONT, GL2.GL_SHININESS, 100.0f);
-
+		
+		gl.glEnable(GL2.GL_LINE_SMOOTH);      
+	    gl.glEnable(GL2.GL_POLYGON_SMOOTH);
+	    gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
+	    
+	    gl.glShadeModel(GLLightingFunc.GL_SMOOTH); 
+	    
 		// definicja œwiat³a
 		float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
