@@ -43,6 +43,8 @@ import optimumPath.common.Point3d;
 import optimumPath.JSON.*;
 
 import java.awt.Component;
+import java.awt.Dimension;
+
 import javax.swing.JCheckBox;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
@@ -111,9 +113,11 @@ public class WindowMain extends JFrame {
 	public WindowMain(Render render) {
 		super("Optymalna œcie¿ka na mapie rastrowej w 3D");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/icon.png")));
-		setResizable(false);
+		setResizable(true);
 		setBounds(100, 100, 1041, 804);
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setMinimumSize(new Dimension(780, 650));
 		
 		this.render = render;
 		this.json = new JsonWriteRead();
@@ -125,8 +129,10 @@ public class WindowMain extends JFrame {
 		
 		initComponents();
 		
+		GLpanel.setLayout(new BorderLayout());
+		GLpanel.setOpaque(false);
+		GLpanel.setMinimumSize(new Dimension(200, 200));
 		GLpanel.add(this.render.getGlcanvas(), BorderLayout.CENTER);
-		GLpanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		createEvents();
 		initLayerSpinner();
@@ -497,7 +503,6 @@ public class WindowMain extends JFrame {
 		
 		GLpanel = new JPanel();
 		panelMain.add(GLpanel, BorderLayout.CENTER);
-		
 		
 		///////////////////////////////////////////////////
 		// Pasek narzêdzi

@@ -211,6 +211,7 @@ public class Render implements GLEventListener, KeyListener {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 	}
+	
 
 	///////////////////////////////////////////////////
 	// rysowanie podstawy
