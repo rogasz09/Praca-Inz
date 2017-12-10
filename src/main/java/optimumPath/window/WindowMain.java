@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -45,6 +46,7 @@ import java.awt.Component;
 import javax.swing.JCheckBox;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.awt.event.InputEvent;
 import javax.swing.JRadioButtonMenuItem;
 import java.awt.FlowLayout;
@@ -761,29 +763,31 @@ public class WindowMain extends JFrame {
 		
 		btnSaveScreen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser fc = new JFileChooser();
-				FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG (*.png)", "PNG", "png");
-				fc.setFileFilter(filter);
+				Thread screenshotThread = new Thread(new Runnable()  {
+					public void run() {
+						try {
+							render.getScreenshot().takeScreen();
+						} catch (InvocationTargetException | InterruptedException e) {
+							e.printStackTrace();
+							ScreenCapture.errorBox("B³ad podczs zapisu widoku", "THread Exception");
+						} finally {
+							render.getScreenshot().saveScreenToPNG();
+						}
+					}
+				});
 				
-				int returnVal = fc.showSaveDialog(windowMain);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-			    	String filePath = fc.getSelectedFile().getPath();
-			    	//This is where a real application would open the file.
-			    	if (fc.getFileFilter().getDescription() == "PNG (*.png)" && !filePath.endsWith(".png"))
-			    		filePath += ".png";
-			    	
-			    	System.out.println("Saving: " + filePath);
-			    	render.saveImage(filePath);
-				} else {
-			    	System.out.println("Save command cancelled by user.");
-			   	}
+				screenshotThread.start();
 			}
 		});
 		
 		btnSavePath.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int returnVal = fc.showSaveDialog(windowMain);
+				if(render.getRenderMap().getPathShift().isEmpty() || render.getRenderMap().getAlgorithm() == null) {
+					JOptionPane.showMessageDialog(null, "Scie¿ka nie istnieje na mapie.", "Zapis œcie¿ki", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				
+				int returnVal = fc.showSaveDialog(null);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 			    	String filePath = fc.getSelectedFile().getPath();
@@ -791,12 +795,8 @@ public class WindowMain extends JFrame {
 			    	if (fc.getFileFilter().getDescription() == "JSON Files" && !filePath.endsWith(".JSON"))
 			    		filePath += ".JSON";
 			    	
-			    	if(!render.getRenderMap().getPathShift().isEmpty() && render.getRenderMap().getAlgorithm() != null) {
-			    		json.writePathToJSON(filePath, render.getRenderMap().getAlgorithm().getPath());
-			    		System.out.println("Saving: " + filePath);
-			    	} else
-			    		System.out.println("Œcie¿ka nie istnieje!");
-			
+			    	json.writePathToJSON(filePath, render.getRenderMap().getAlgorithm().getPath());
+			    	System.out.println("Saving: " + filePath);
 				} else {
 			    	System.out.println("Save command cancelled by user.");
 			   	}

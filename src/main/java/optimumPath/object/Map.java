@@ -442,6 +442,38 @@ public class Map {
 		algProcessor = null;
 	}
 	
+	public void printMap() {
+		for(int z = 0; z < sizeZ; z++) {
+			for(int y = 0; y < sizeY; y++) {
+				for(int x = 0; x < sizeX; x++) {
+					switch(rasterMap[z][y][x]) {
+					case OBSTACLE:
+						System.out.print("# ");
+						break;
+					case FORBIDDEN:
+						System.out.print("* ");
+						break;
+					case PATH:
+						System.out.print("@ ");
+						break;
+					case START:
+						System.out.print("1 ");
+						break;
+					case END:
+						System.out.print("2 ");
+						break;
+					default:
+						System.out.print("0 ");
+						break;
+					}
+				}
+				System.out.print('\n');
+			}
+			System.out.print('\n');
+		}
+		System.out.print('\n');
+	}
+	
 	////////////////////////////////////
 	// getters and setters
 	
@@ -453,11 +485,11 @@ public class Map {
 			return;
 		}
 		
-		if (type == Raster.START) {
+		if (type == Raster.START && isStart) {
 			Point3d raster = this.pointFromShift(startShift);
 			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
 		}
-		if (type == Raster.END) {
+		if (type == Raster.END && isEnd) {
 			Point3d raster = this.pointFromShift(endShift);
 			rasterMap[(int)raster.getZ()][(int)raster.getY()][(int)raster.getX()] = Raster.EMPTY;
 		}

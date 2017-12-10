@@ -6,6 +6,8 @@ package optimumPath.opengl;
 import java.awt.Color;
 import java.awt.DisplayMode;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,15 +37,16 @@ import optimumPath.common.*;
  *
  */
 
-public class Render implements GLEventListener {
+public class Render implements GLEventListener, KeyListener {
 
 	private Map renderMap;
 	private MapEdition editionMap;
 	private Camera camera;
+	private ScreenCapture screenshot;
 	private MaterialsList materials;
+	
 	private GLU glu;
 	final private GLCanvas glcanvas;
-	private ByteBuffer buffer;
 
 	private int offsetLayer = 0;
 	private boolean isMapCreation = false;
@@ -55,13 +58,18 @@ public class Render implements GLEventListener {
 
 	public Render() {
 		// getting the capabilities object of GL2 profile
-		final GLProfile profile = GLProfile.get(GLProfile.GL2);
+		final GLProfile profile = GLProfile.getMaxProgrammable(true);
 		GLCapabilities capabilities = new GLCapabilities(profile);
+		
+		capabilities.setNumSamples(2);
+		capabilities.setSampleBuffers(true);
 
 		this.camera = new Camera(); // Kamera dla glcanvas
 		this.renderMap = new Map(); // Mapa zawierj¹ca informacje o przeszkodach œcie¿ce itp.
 		this.editionMap = new MapEdition(); //Obiekt zawieraj¹cy metody do modyfikacji mapy np. odczyt wspolrzednych mapy
+		this.screenshot = new ScreenCapture(); //do zapisu okna openGL do pliku PNG
 		this.materials = new MaterialsList();
+		
 		this.glcanvas = new GLCanvas(capabilities); // canvas
 		this.glu = new GLU(); // glu
 
@@ -75,6 +83,8 @@ public class Render implements GLEventListener {
 
 		glcanvas.addMouseListener(editionMap);
 		glcanvas.addMouseMotionListener(editionMap);
+		
+		glcanvas.addKeyListener(this);
 		glcanvas.setSize(100, 100);
 		
 		final FPSAnimator animator = new FPSAnimator(glcanvas, 60, true);
@@ -85,7 +95,6 @@ public class Render implements GLEventListener {
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		// MouseEvent mouse = camera.getMouse();
 
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
@@ -131,13 +140,12 @@ public class Render implements GLEventListener {
 				camera.getVectorUp().getX(), camera.getVectorUp().getY(), camera.getVectorUp().getZ());
 
 		gl.glFlush();
-
-		int viewport[] = new int[4];
-		gl.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
-		buffer = GLBuffers.newDirectByteBuffer(viewport[2] * viewport[3] * 4);
-
-		gl.glReadBuffer(GL2.GL_BACK);
-		gl.glReadPixels(0, 0, viewport[2], viewport[3], GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+		
+		//screenshot mapy
+		if (screenshot.isTakingScreenshot()) {
+			screenshot.getSizeFromCanvas(gl);
+			screenshot.takeScreenshot(gl);
+		}
 	}
 
 	@Override
@@ -351,35 +359,7 @@ public class Render implements GLEventListener {
 		
 	}
 
-	// tworzenie screenshot funkcji
-	public BufferedImage makeScreenshot() {
-		int width = glcanvas.getWidth();
-		int height = glcanvas.getHeight();
-
-		BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		Graphics graphics = screenshot.getGraphics();
-
-		for (int h = 0; h < height; h++) {
-			for (int w = 0; w < width; w++) {
-				graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff), (buffer.get() & 0xff)));
-				buffer.get();
-				graphics.drawRect(w, height - h, 1, 1);
-			}
-		}
-
-		return screenshot;
-	}
-
-	public void saveImage(String pathFile) {
-		try {
-
-			BufferedImage screenshot = makeScreenshot();
-
-			ImageIO.write(screenshot, "PNG", new File(pathFile));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
+	
 
 	////////////////////////////////////////
 	// ---------- get i set --------------
@@ -464,6 +444,38 @@ public class Render implements GLEventListener {
 
 	public void setMaterials(MaterialsList materials) {
 		this.materials = materials;
+	}
+	
+	public ScreenCapture getScreenshot() {
+		return screenshot;
+	}
+
+	public void setScreenshot(ScreenCapture screenshot) {
+		this.screenshot = screenshot;
+	}
+
+	//////////////////////////////////////////////////////////
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int keyCode = e.getKeyCode();
+		
+		switch( keyCode ) { 
+	        case KeyEvent.VK_P:
+	            renderMap.printMap();
+	            break;
+     }
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	//////////////////
