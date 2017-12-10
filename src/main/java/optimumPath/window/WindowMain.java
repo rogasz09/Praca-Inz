@@ -2,62 +2,60 @@ package optimumPath.window;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JSeparator;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JButton;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JToolBar;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.ToolTipManager;
-import javax.swing.border.TitledBorder;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JSpinner;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.UIManager;
-import javax.swing.JSlider;
-import javax.swing.JRadioButton;
-import javax.swing.event.ChangeEvent;
-
-
-import optimumPath.frame.*;
-import optimumPath.opengl.*;
-import optimumPath.object.Map;
-import optimumPath.common.Point3d;
-import optimumPath.JSON.*;
-
 import java.awt.Component;
 import java.awt.Dimension;
-
-import javax.swing.JCheckBox;
-import javax.swing.KeyStroke;
+import java.awt.SystemColor;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
-import java.awt.event.InputEvent;
-import javax.swing.JRadioButtonMenuItem;
-import java.awt.FlowLayout;
-import javax.swing.border.MatteBorder;
-import java.awt.SystemColor;
-import javax.swing.SwingConstants;
-import java.awt.Toolkit;
+
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import net.miginfocom.swing.MigLayout;
+import optimumPath.JSON.JsonWriteRead;
+import optimumPath.common.Point3d;
+import optimumPath.frame.ToolBarButton;
+import optimumPath.frame.ToolBarToggleButton;
+import optimumPath.object.Map;
+import optimumPath.opengl.Render;
+import optimumPath.opengl.ScreenCapture;
 
 
 public class WindowMain extends JFrame {
@@ -75,7 +73,7 @@ public class WindowMain extends JFrame {
 	private JSpinner spnLayer;
 	private JSpinner spnThick;
 	private JRadioButton rdbtnPreview, rdbtnMapMod;
-	private JLabel txtAlg, txtMetric, txtPathLeng, txtNumbRaster, txtIteration;
+	private JLabel txtAlg, txtMetric, txtPathLeng, txtNumbRaster, txtIteration, txtWorking;
 	private JComboBox<String> cbAlgorithm, cbMetrics, cbZoneProhibited;
 	/*Menu animacji*/
 	private JSlider sliderAnimSpeed;
@@ -121,7 +119,7 @@ public class WindowMain extends JFrame {
 		
 		this.render = render;
 		this.json = new JsonWriteRead();
-		this.fc = new JFileChooser();
+		this.fc = new JFileChooser("./maps");
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "JSON", "json");
 		this.fc.setFileFilter(filter);
 		this.render.setWindow(this);
@@ -501,6 +499,10 @@ public class WindowMain extends JFrame {
 		txtNumbRaster.setHorizontalAlignment(SwingConstants.LEFT);
 		panelConsole.add(txtNumbRaster, "cell 4 1,growx,aligny top");
 		
+		txtWorking = new JLabel("Praca w toku");
+		txtWorking.setForeground(Color.RED);
+		panelConsole.add(txtWorking, "cell 6 1");
+		
 		GLpanel = new JPanel();
 		panelMain.add(GLpanel, BorderLayout.CENTER);
 		
@@ -652,6 +654,7 @@ public class WindowMain extends JFrame {
 		txtIteration.setText(((Integer)render.getRenderMap().getNumberIteration()).toString());
 		txtNumbRaster.setText(((Integer)render.getRenderMap().getNumberRasterPath()).toString());
 		txtPathLeng.setText(((Double)length).toString());
+		txtWorking.setText("");
 	}
 	
 	public void setComponentsEnableAlg(boolean enable) {
@@ -774,10 +777,10 @@ public class WindowMain extends JFrame {
 							render.getScreenshot().takeScreen();
 						} catch (InvocationTargetException | InterruptedException e) {
 							e.printStackTrace();
-							ScreenCapture.errorBox("B³ad podczs zapisu widoku", "THread Exception");
-						} finally {
+							ScreenCapture.errorBox("B³ad podczs zapisu widoku", "Thread Exception");
+						} 
 							render.getScreenshot().saveScreenToPNG();
-						}
+						
 					}
 				});
 				
@@ -792,7 +795,7 @@ public class WindowMain extends JFrame {
 					return;
 				}
 				
-				int returnVal = fc.showSaveDialog(null);
+				int returnVal = fc.showSaveDialog(windowMain);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 			    	String filePath = fc.getSelectedFile().getPath();
@@ -878,6 +881,7 @@ public class WindowMain extends JFrame {
 					return;
 				
 				setComponentsEnableAlg(false);
+				txtWorking.setText("Praca w toku");
 				render.setAnimation(cboxAnimation.isSelected());
 				render.getRenderMap().setSpeedAnimation(sliderAnimSpeed.getValue());
 				render.getRenderMap().resetPath();

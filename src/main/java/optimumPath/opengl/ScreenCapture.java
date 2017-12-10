@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.jogamp.opengl.GL2;
@@ -22,7 +21,7 @@ public class ScreenCapture {
 	private ByteBuffer buffer;
 	private int CanvasWidth, CanvasHeight;
 	
-	private boolean takingScreenshot = false;
+	private volatile boolean takingScreenshot = false;
 	
     //////////////////////////////
     // konstruktory
@@ -97,14 +96,9 @@ public class ScreenCapture {
 	
 	public void takeScreen() throws InvocationTargetException, InterruptedException {
 		takingScreenshot = true;
-		SwingUtilities.invokeAndWait(new Runnable() {
-
-			@Override
-			public void run() {
-				//czekaj na wypelnienie bufora
-				while(takingScreenshot) {}
-			}
-		});
+		
+		//czekaj na wypelnienie bufora
+		while(takingScreenshot) {}
 		
 		if(!takingScreenshot)
 			JOptionPane.showMessageDialog(null, "Zrobiono zdjêcie widoku.\nWybierz miejsce zapisu pliku.", "Screenshot", JOptionPane.INFORMATION_MESSAGE);

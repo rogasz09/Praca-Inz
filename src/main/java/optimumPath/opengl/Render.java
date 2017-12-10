@@ -3,18 +3,8 @@
  */
 package optimumPath.opengl;
 
-import java.awt.Color;
 import java.awt.DisplayMode;
-import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -24,20 +14,22 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.GLBuffers;
+import com.jogamp.opengl.util.gl2.GLUT;
 
-import optimumPath.object.*;
+import optimumPath.common.Point3d;
+import optimumPath.object.Camera;
+import optimumPath.object.Map;
+import optimumPath.object.Material;
+import optimumPath.object.MaterialsList;
 import optimumPath.window.WindowMain;
-import optimumPath.common.*;
 
 /**
  * @author
  *
  */
 
-public class Render implements GLEventListener, KeyListener {
+public class Render implements GLEventListener {
 
 	private Map renderMap;
 	private MapEdition editionMap;
@@ -84,7 +76,7 @@ public class Render implements GLEventListener, KeyListener {
 		glcanvas.addMouseListener(editionMap);
 		glcanvas.addMouseMotionListener(editionMap);
 		
-		glcanvas.addKeyListener(this);
+		//glcanvas.addKeyListener(this);
 		glcanvas.setSize(100, 100);
 		
 		final FPSAnimator animator = new FPSAnimator(glcanvas, 60, true);
@@ -456,7 +448,7 @@ public class Render implements GLEventListener, KeyListener {
 	}
 
 	//////////////////////////////////////////////////////////
-	@Override
+	/*@Override
 	public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		
@@ -464,20 +456,8 @@ public class Render implements GLEventListener, KeyListener {
 	        case KeyEvent.VK_P:
 	            renderMap.printMap();
 	            break;
-     }
-	}
-
-	@Override
-	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+		}
+	}*/
 	
 	//////////////////
 
