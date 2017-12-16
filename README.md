@@ -1,1 +1,2 @@
-"# Praca-Inz" 
+"#Praca-Inz" 
+###Genetic Algorithm
