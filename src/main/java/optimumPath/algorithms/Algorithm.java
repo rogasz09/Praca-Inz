@@ -17,15 +17,15 @@ public class Algorithm {
 	private Node endNode;
 
 	private ArrayList<Node> path;
-	
+
 	private int zoneProhibited;
 	private int thick;
 	protected Map renderMap;
-	
+
 	protected int numberIteration;
 	protected int numberRasterPath;
 	protected double lengthPath;
-	
+
 	protected boolean stopAlgorithm = false;
 
 	public Algorithm(Map inputMap) {
@@ -43,7 +43,7 @@ public class Algorithm {
 		// point
 		startNode = null;
 		endNode = null;
-		
+
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
 				for (int x = 0; x < sizeX; x++) {
@@ -59,14 +59,13 @@ public class Algorithm {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	/*****************************************************
-		Metody do wypisywania w konsoli
-		Uzywane do debugowania
-	*****************************************************/
-	
+	 * Metody do wypisywania w konsoli Uzywane do debugowania
+	 *****************************************************/
+
 	// wypisuje w kosoli mape raster
 	public void printMap(Raster[][][] inputMap) {
 		for (int z = 0; z < sizeZ; z++) {
@@ -120,14 +119,15 @@ public class Algorithm {
 		System.out.print(Integer.toString(node.getZ()) + " ");
 		System.out.print("), ");
 	}
+
 	/*****************************************************/
-	
-	//komunikaty problemu
+
+	// komunikaty problemu
 	public static void issueInfoBox(String infoMessage, String issueTitle) {
-        JOptionPane.showMessageDialog(null, infoMessage, "Problem: " + issueTitle, JOptionPane.INFORMATION_MESSAGE);
-    }
-	
-	//spradzanie czy na mapie znajdujê siê punkt startowy i koñcowy
+		JOptionPane.showMessageDialog(null, infoMessage, "Problem: " + issueTitle, JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	// spradzanie czy na mapie znajdujê siê punkt startowy i koñcowy
 	public boolean checkSatartEnd() {
 		if (!renderMap.isStart() && !renderMap.isEnd()) {
 			issueInfoBox("Na mapie nie zaznaczono punktu startowego i koñcowego", "brak punktu start i koniec");
@@ -143,27 +143,29 @@ public class Algorithm {
 		}
 		return true;
 	}
-	
-	//komunikat o braku  œcie¿ki
+
+	// komunikat o braku œcie¿ki
 	public void noPath() {
 		issueInfoBox("Algorytm nie znalaz³ scie¿ki", "brak œcie¿ki");
 	}
-	
-	//komunikat o wystêpowaniu punktu startowego lub koñcowego w rastrze zabronionym
+
+	// komunikat o wystêpowaniu punktu startowego lub koñcowego w rastrze
+	// zabronionym
 	public void startEndInForbidden() {
-		issueInfoBox("Punkt stratowy lub koñcowy znajdujê siê w rastrach zabronionych", "zabroniony punkt start lub koniec");
+		issueInfoBox("Punkt stratowy lub koñcowy znajdujê siê w rastrach zabronionych",
+				"zabroniony punkt start lub koniec");
 	}
-	
-	//komunikat o zatrzymaniu algorytmu
+
+	// komunikat o zatrzymaniu algorytmu
 	public void infoStopAlg() {
 		issueInfoBox("Algorytm zosta³ zatrzymany", "stop");
 	}
-	
+
 	// zapisuje sciezke do mapy rastrow
 	public void writePathToMap(Raster[][][] rasterMap) {
 		if (path == null)
 			return;
-		
+
 		ArrayList<Node> copyPath = copyListNode(path);
 		copyPath.remove(0);
 		copyPath.remove(copyPath.size() - 1);
@@ -174,15 +176,17 @@ public class Algorithm {
 		}
 	}
 	
+	
+
 	public boolean isStartEndInForbidden() {
 		if (map[startNode.getZ()][startNode.getY()][startNode.getX()] == Raster.FORBIDDEN)
 			return true;
 		if (map[endNode.getZ()][endNode.getY()][endNode.getX()] == Raster.FORBIDDEN)
 			return true;
-		
+
 		return false;
 	}
-	
+
 	public void writeCopyToMain() {
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
@@ -192,7 +196,7 @@ public class Algorithm {
 			}
 		}
 	}
-	
+
 	protected void createForbidden() {
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
@@ -202,7 +206,7 @@ public class Algorithm {
 			}
 		}
 	}
-	
+
 	protected void maskForbidden(int cz, int cy, int cx) {
 		for (int z = cz - thick; z <= cz + thick; z++)
 			for (int y = cy - thick; y <= cy + thick; y++)
@@ -215,18 +219,18 @@ public class Algorithm {
 								}
 							}
 						}
-					}	
+					}
 				}
 	}
-	
+
 	protected boolean maskForbiddenRobot(Node currentNode, boolean meakeForbidden) {
 		if (zoneProhibited != 2)
 			return true;
-		
+
 		int cx = currentNode.getX();
 		int cy = currentNode.getY();
 		int cz = currentNode.getZ();
-		
+
 		boolean isForbidden = true;
 		for (int z = cz - thick; z <= cz + thick; z++)
 			for (int y = cy - thick; y <= cy + thick; y++)
@@ -239,26 +243,26 @@ public class Algorithm {
 								isForbidden = false;
 							}
 						}
-					}	
+					}
 				}
 		return isForbidden;
 	}
-	
+
 	protected void checkNieghboursForbidden(ArrayList<Node> list) {
 		if (zoneProhibited != 2)
 			return;
-					
+
 		for (int i = 0; i < list.size(); i++) {
 			Node neighbour = list.get(i);
 			if (isInMap(neighbour.getZ(), neighbour.getY(), neighbour.getX()))
 				maskForbiddenRobot(neighbour, true);
 		}
 	}
-	
+
 	public boolean checkBeforePerform() {
-		if(!checkSatartEnd())
+		if (!checkSatartEnd())
 			return false;
-		
+
 		if (zoneProhibited == 1) {
 			createForbidden();
 			if (isStartEndInForbidden()) {
@@ -274,10 +278,10 @@ public class Algorithm {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	protected boolean isInMap(int z, int y, int x) {
 		if (z < sizeZ && z >= 0) {
 			if (y < sizeY && y >= 0) {
@@ -288,15 +292,13 @@ public class Algorithm {
 		}
 		return false;
 	}
-	
+
 	/*****************************************************/
-	
-	
-	
+
 	/*****************************************************
-	 METODY OBSLUGI ALGORYTMU
+	 * METODY OBSLUGI ALGORYTMU
 	 *****************************************************/
-	
+
 	// zwraca wartosc true lub false w zaleznosci czy znajduje sie
 	// w liscie nodow podany node
 	protected boolean isInSet(Node currentNode, ArrayList<Node> list) {
@@ -306,7 +308,7 @@ public class Algorithm {
 		}
 		return false;
 	}
-	
+
 	// zwraca indeks w liscie nodow dla znlezionego noda
 	// jesli node nie zostal znaleziony, metoda zwraca -1
 	protected int getNodeFromList(Node currentNode, ArrayList<Node> list) {
@@ -327,8 +329,8 @@ public class Algorithm {
 
 		return false;
 	}
-	
-	//kopiowanie listy Node
+
+	// kopiowanie listy Node
 	protected ArrayList<Node> copyListNode(ArrayList<Node> list) {
 		ArrayList<Node> copyList = new ArrayList<Node>();
 		for (int i = 0; i < list.size(); i++) {
@@ -337,39 +339,57 @@ public class Algorithm {
 			newNode.setF(tmpNode.getF());
 			copyList.add(newNode);
 		}
-		
+
 		return copyList;
+	}
+
+	// check if a raster is in map and if it is not obstacle or forbidden
+	protected boolean checkNode(int z, int y, int x) {
+		if (z < this.getSizeZ() && z >= 0) {
+			if (y < this.getSizeY() && y >= 0) {
+				if (x < this.getSizeX() && x >= 0) {
+
+					if (getMap()[z][y][x] != Raster.FORBIDDEN && getMap()[z][y][x] != Raster.OBSTACLE) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	protected boolean checkNode(Node node) {
+		return checkNode(node.getZ(), node.getY(), node.getX());
 	}
 	/*****************************************************/
 
-
 	
 	/*****************************************************
-	 Metody dla metryki Chebyshev
+	 * Metody dla metryki Chebyshev
 	 *****************************************************/
-	
-	protected double getChebyshevCost(Node actualNode,Node neighbour) {
-		int direction =  checkChebyshevDirection(actualNode, neighbour);
-		return Math.sqrt((double)direction);
+
+	protected double getChebyshevCost(Node actualNode, Node neighbour) {
+		int direction = checkChebyshevDirection(actualNode, neighbour);
+		return Math.sqrt((double) direction);
 	}
-	
+
 	protected int checkChebyshevDirection(Node actualNode, Node neighbour) {
-		int sameX,sameY,sameZ;
+		int sameX, sameY, sameZ;
 		int sum = 0;
-		sameX = (actualNode.getX()==neighbour.getX()) ? 0 : 1;
-		sameY = (actualNode.getY()==neighbour.getY()) ? 0 : 1;
-		sameZ = (actualNode.getZ()==neighbour.getZ()) ? 0 : 1;
+		sameX = (actualNode.getX() == neighbour.getX()) ? 0 : 1;
+		sameY = (actualNode.getY() == neighbour.getY()) ? 0 : 1;
+		sameZ = (actualNode.getZ() == neighbour.getZ()) ? 0 : 1;
 		sum = sameX + sameY + sameZ;
 		return sum;
 	}
 
-	protected boolean checkPossibleTransition(Node actualNode,Node neighbour) {
-		int direction =  checkChebyshevDirection(actualNode, neighbour);
-		
+	protected boolean checkPossibleTransition(Node actualNode, Node neighbour) {
+		int direction = checkChebyshevDirection(actualNode, neighbour);
+
 		ArrayList<Node> neighboursActual = possibleNeighboursChebyshev(actualNode);
 		ArrayList<Node> neighboursNeighbour = possibleNeighboursChebyshev(neighbour);
 		ArrayList<Node> shared = commonPart(neighboursActual, neighboursNeighbour);
-		
+
 		if (direction == 3) {
 			for (int i = 0; i < shared.size(); i++) {
 				int x = shared.get(i).getX();
@@ -377,7 +397,7 @@ public class Algorithm {
 				int z = shared.get(i).getZ();
 				if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
 					return false;
-				} 
+				}
 			}
 			return true;
 		}
@@ -387,23 +407,23 @@ public class Algorithm {
 					int x = shared.get(i).getX();
 					int y = shared.get(i).getY();
 					int z = shared.get(i).getZ();
-					if(actualNode.getX() == x)
+					if (actualNode.getX() == x)
 						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
 							return false;
-					} else
-						continue;
+						} else
+							continue;
 				}
 				return true;
-			} else if(actualNode.getY() == neighbour.getY()) {
+			} else if (actualNode.getY() == neighbour.getY()) {
 				for (int i = 0; i < shared.size(); i++) {
 					int x = shared.get(i).getX();
 					int y = shared.get(i).getY();
 					int z = shared.get(i).getZ();
-					if(actualNode.getY() == y)
+					if (actualNode.getY() == y)
 						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
 							return false;
-					} else
-						continue;
+						} else
+							continue;
 				}
 				return true;
 			} else {
@@ -411,29 +431,29 @@ public class Algorithm {
 					int x = shared.get(i).getX();
 					int y = shared.get(i).getY();
 					int z = shared.get(i).getZ();
-					if(actualNode.getZ() == z)
+					if (actualNode.getZ() == z)
 						if (map[z][y][x] == Raster.FORBIDDEN || map[z][y][x] == Raster.OBSTACLE) {
 							return false;
-					} else
-						continue;
+						} else
+							continue;
 				}
 				return true;
 			}
 		}
 		return true;
 	}
-	
+
 	protected ArrayList<Node> commonPart(ArrayList<Node> list1, ArrayList<Node> list2) {
 		ArrayList<Node> listCommon = new ArrayList<Node>();
-		
-		for(int i = 0; i < list1.size(); i++)
-			for(int j = 0; j < list2.size(); j++) {
+
+		for (int i = 0; i < list1.size(); i++)
+			for (int j = 0; j < list2.size(); j++) {
 				if (isSameNode(list1.get(i), list2.get(j)))
 					listCommon.add(list1.get(i));
 			}
 		return listCommon;
 	}
-	
+
 	protected ArrayList<Node> possibleNeighboursChebyshev(Node current) {
 		int currentX = current.getX();
 		int currentY = current.getY();
@@ -450,15 +470,13 @@ public class Algorithm {
 		checkNieghboursForbidden(possibleNeighbours);
 		return possibleNeighbours;
 	}
+
 	/*****************************************************/
-	
-	
-	
-	
+
 	/*****************************************************
-	 Metody dla metryki Manhattan
+	 * Metody dla metryki Manhattan
 	 *****************************************************/
-	
+
 	protected ArrayList<Node> possibleNeighboursManhattan(Node current) {
 		int currentX = current.getX();
 		int currentY = current.getY();
@@ -475,7 +493,13 @@ public class Algorithm {
 		checkNieghboursForbidden(possibleNeighbours);
 		return possibleNeighbours;
 	}
+
 	/*****************************************************/
+
+	public void perform(boolean isChebyshev) {
+		//TODO Write behavior of algorithm
+	}
+	
 	
 	//////////////////////////////////////////////////////
 	// Getters and Setters
@@ -590,8 +614,6 @@ public class Algorithm {
 	public void setStopAlgorithm(boolean stopAlgorithm) {
 		this.stopAlgorithm = stopAlgorithm;
 	}
-	
-	
-	
+
 	//////////////////////////////////////////////
 }

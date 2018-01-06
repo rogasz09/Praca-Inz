@@ -3,7 +3,6 @@ package optimumPath.algorithms;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import optimumPath.common.*;
 import optimumPath.object.*;
 
 public class AStar extends Algorithm {
@@ -12,6 +11,7 @@ public class AStar extends Algorithm {
 		super(inputMap);
 	}
 
+	@Override
 	public void perform(boolean isChebyshev) {
 		if(!checkBeforePerform())
 			return;
@@ -172,21 +172,7 @@ public class AStar extends Algorithm {
 			   Math.pow(currentNode.getX() - getEndNode().getX(), 2));
 	}
 
-	// check if a raster is in map and if it is not obstacle or forbidden
-	private boolean checkNode(int z, int y, int x) {
-
-		if (z < this.getSizeZ() && z >= 0) {
-			if (y < this.getSizeY() && y >= 0) {
-				if (x < this.getSizeX() && x >= 0) {
-
-					if (getMap()[z][y][x] != Raster.FORBIDDEN && getMap()[z][y][x] != Raster.OBSTACLE) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+	
 
 	private ArrayList<Node> getNeighboursManhattan(Node currentNode) {
 

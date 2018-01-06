@@ -43,33 +43,22 @@ public class Map {
 	////////////////////////////////////
 	// watek dla algorytmu
 	public class AlgorithmPerform implements Runnable {
-		private volatile AStar algorithmAStar;
-		private volatile WavePropagation algorithmWP;
-		private boolean isChebyshev, isAStar;
+		private volatile Algorithm algorithm;
+		private boolean isChebyshev;
 		private volatile boolean isFinish = false;
 		
-		public AlgorithmPerform(boolean isAStar, boolean isChebyshev) {
-		    this.isAStar = isAStar;
+		public AlgorithmPerform(boolean isChebyshev) {
 		    this.isChebyshev = isChebyshev;
 		}
 		
-		public void setAStar(AStar algorithmAStar) {
-			this.algorithmAStar = algorithmAStar;
-		}
-		
-		public void setWavePropagation(WavePropagation algorithmWP) {
-			this.algorithmWP = algorithmWP;
+		public void setAlgorithm(Algorithm algorithm) {
+			this.algorithm = algorithm;
 		}
 		
 		@Override
 		public void run() {
-			if (isAStar) {
-				algorithmAStar.perform(isChebyshev);
-				algorithmAStar.writePathToMap(rasterMap);
-			} else {
-				algorithmWP.perform(isChebyshev);
-				algorithmWP.writePathToMap(rasterMap);
-			}
+			algorithm.perform(isChebyshev);
+			algorithm.writePathToMap(rasterMap);
 			isFinish = true;
 		}
 
@@ -407,8 +396,8 @@ public class Map {
 		algorithm.setZoneProhibited(zoneProhibited);
 		algorithm.setThick(thick);
 		
-		algProcessor = new AlgorithmPerform(true, isChebyshev);
-		algProcessor.setAStar(algorithmAStar);
+		algProcessor = new AlgorithmPerform(isChebyshev);
+		algProcessor.setAlgorithm(algorithmAStar);
 		Thread algThread = new Thread(algProcessor);
 		algThread.start();
 		
@@ -423,8 +412,26 @@ public class Map {
 		algorithm.setZoneProhibited(zoneProhibited);
 		algorithm.setThick(thick);
 		
-		algProcessor = new AlgorithmPerform(false, isChebyshev);
-		algProcessor.setWavePropagation(algorithmWP);
+		algProcessor = new AlgorithmPerform(isChebyshev);
+		algProcessor.setAlgorithm(algorithmWP);
+		Thread algThread = new Thread(algProcessor);
+		algThread.start();
+		
+	}
+	
+	public void performGenteticAlgorithm(boolean isChebyshev, int zoneProhibited, int thick, boolean optimization) {
+		if(algProcessor != null)
+			return;
+		
+		MazeController algorithmGA = new MazeController(this);
+		algorithmGA.setOptimization(optimization);
+		
+		algorithm = algorithmGA;
+		algorithm.setZoneProhibited(zoneProhibited);
+		algorithm.setThick(thick);
+		
+		algProcessor = new AlgorithmPerform(isChebyshev);
+		algProcessor.setAlgorithm(algorithmGA);
 		Thread algThread = new Thread(algProcessor);
 		algThread.start();
 		

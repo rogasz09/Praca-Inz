@@ -57,6 +57,7 @@ public class WavePropagation extends Algorithm{
 	/////////////////////////////////////////////////////
 	//	GLOWNY ALGORYTM PROPAGACJI FALI
 	
+	@Override
 	public void perform(boolean isChebyshev) {
 		if(!checkBeforePerform())
 			return;

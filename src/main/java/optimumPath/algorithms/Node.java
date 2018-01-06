@@ -52,6 +52,10 @@ public class Node {
 		return this.parent;
 	}
 	
+	public Point3d getPosition() {
+		return new Point3d(x, y, z);
+	}
+	
 	public int getZ() {
 		return z;
 	}
