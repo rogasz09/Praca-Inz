@@ -1,20 +1,29 @@
 package optimumPath.algorithms;
 
+import java.awt.Dimension;
 import java.util.ArrayList;
 
-import optimumPath.common.*;
+import javax.swing.JFrame;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import optimumPath.common.Point3d;
 import optimumPath.object.Map;
 
 public class MazeController extends Algorithm {
 	private GeneticAlgorithm geneticAlgorithm;
 	public ArrayList<Integer> fittestDirections;
-	
+
 	private boolean optimization = false;
 
 	public MazeController(Map inputMap) {
 		super(inputMap);
 	}
-
 
 	public Point3d Move(Point3d position, int direction) {
 		Node testNode;
@@ -89,7 +98,7 @@ public class MazeController extends Algorithm {
 			}
 			break;
 		}
-		
+
 		return position;
 	}
 
@@ -106,7 +115,7 @@ public class MazeController extends Algorithm {
 				Math.abs(position.getZ() - this.getEndNode().getZ()));
 		double result = 1 / (double) (deltaPosition.getX() + deltaPosition.getY() + 1);
 		if (result == 1)
-			System.out.println("TestRoute result=" + result + ",(" + position.getX() + "," + position.getY() + ")");
+			System.out.println("Wynik testu drogi=" + result + ",(" + position.getX() + "," + position.getY() + ")");
 		return result;
 	}
 
@@ -115,54 +124,74 @@ public class MazeController extends Algorithm {
 		fittestDirections = new ArrayList<Integer>();
 		this.setPath(new ArrayList<Node>());
 
-		if(isChebyshev)
+		if (isChebyshev)
 			geneticAlgorithm = new GeneticAlgorithm(this, 3);
 		else
 			geneticAlgorithm = new GeneticAlgorithm(this, 2);
-		
+
 		geneticAlgorithm.mazeController = this;
 		geneticAlgorithm.Run();
-
-		while (geneticAlgorithm.busy) {
+		
+		XYSeries series = new XYSeries("Wartoœæ najlepszego chromosomu od generacji");
+		
+		while (geneticAlgorithm.isBusy()) {
 			geneticAlgorithm.Epoch();
 			RenderFittestChromosomePath();
+			series.add(geneticAlgorithm.generation, geneticAlgorithm.bestFitnessScore);
 		}
-		
-		if(optimization)
+
+		// Add the series to your data set
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		dataset.addSeries(series);
+		// Generate the graph
+		JFreeChart chart = ChartFactory.createXYLineChart("Wynik dzia³ania algorytmu", // Title
+				"Generacja", // x-axis Label
+				"Najlepsza wartoœæ chromosomu", // y-axis Label
+				dataset, // Dataset
+				PlotOrientation.VERTICAL, // Plot Orientation
+				true, // Show Legend
+				true, // Use tooltips
+				false // Configure chart to generate URLs?
+		);
+		ChartPanel chartPanel = new ChartPanel(chart, false);
+		chartPanel.setPreferredSize(new Dimension(700, 270));
+		final JFrame frame = new JFrame();
+		frame.setContentPane(chartPanel);
+		frame.setBounds(200, 200, 700, 500);
+		frame.setVisible(true);
+
+		if (optimization)
 			optimizationPath2();
-		
+
 		getPath().add(0, this.getStartNode());
 		getPath().add(this.getEndNode());
-		
-		
-		
+
 		printList(getPath());
 		System.out.println("D³ugoœæ œcie¿ki: " + getPath().size());
-
 		System.out.println("Iloœæ generacji: " + this.geneticAlgorithm.getGeneration());
 	}
-	
+
 	public void optimizationPath() {
 		ArrayList<Node> optPath = new ArrayList<Node>();
-		
+
 		for (int i = 0; i < getPath().size(); i++) {
-			if(!isInSet(getPath().get(i), optPath))
+			if (!isInSet(getPath().get(i), optPath))
 				optPath.add(getPath().get(i));
 		}
-		
+
 		setPath(optPath);
 	}
-	
+
 	public void optimizationPath2() {
 		for (int i = 0; i < getPath().size(); i++) {
 			Node temp = getPath().get(i);
 			for (int j = getPath().size() - 1; j > i; j--) {
 				if (j >= getPath().size())
 					break;
-				
+
 				if (isSameNode(temp, getPath().get(j))) {
-					//int count = j - i;
-					for(int k = j; k > i; k--) {
+					// int count = j - i;
+					for (int k = j; k > i; k--) {
 						getPath().remove(k);
 					}
 				}
